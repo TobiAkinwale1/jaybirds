@@ -1,0 +1,266 @@
+/* CSS styles for buttons */
+.custom-button {
+    background-color: rgb(18, 18, 18);
+    color: #ffffff;
+    border: white;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.block {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;    
+}
+.join-button {
+    display: flex;
+    flex-direction: column;
+    width: 6vw;
+    height: 2.5vw;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(70, 88, 244);
+    color: #eeeeee;       
+    border: white;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 10px;
+}
+.create-button {
+    display: flex;
+    flex-direction: column;
+    width: 6vw;
+    height: 2.5vw;
+    align-items: center;
+    justify-content: center;    
+    background-color: rgb(236, 236, 236);
+    color: rgb(70, 88, 244);    
+    border: white;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.message-box {
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;
+    background-color: whitesmoke;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    width: 20vw;
+    align-items: stretch;
+}
+
+.messages {
+    overflow-y: scroll;
+    flex: 1;
+    width: 100%;
+}
+
+.inputs{
+    padding: 10px;
+    display: flex;
+}
+
+h2,h5 {
+    text-align: center;
+}
+
+#message {
+    flex: 1;
+}
+
+.text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.muted { 
+    font-size: 10px;
+    color: darkgrey;
+}
+
+.center-box {
+    margin: auto;
+}
+
+.character-box {
+    height: 30vw;
+    width: 80vw;
+    text-align:center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;    
+}
+
+.scarlet-btn {
+    background-color: #E7483D;
+    color: #74150E;
+    font-family: "Times New Roman";    
+    font-size: 25px;
+    font-weight: bold;
+    font-variant: small-caps;
+    cursor:pointer;
+    border:none;
+    width:12vw;
+    height:24vw;
+    border-radius: 10px;    
+}
+.scarlet-btn:hover {
+    background-color: whitesmoke;
+}
+.scarlet-btn:focus {
+    background-color: whitesmoke;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
+.mustard-btn {
+    background-color: #E7CC3D;
+    color: #8E7A0C;
+    font-family: "Times New Roman";
+    font-size: 25px;
+    font-weight: bold;
+    font-variant: small-caps;    
+    cursor:pointer;
+    border:none;
+    width:12vw;
+    height:24vw;    
+    border-radius: 10px;    
+}
+.mustard-btn:hover {
+    background-color: whitesmoke;
+    color: #B68F08;
+}
+.mustard-btn:focus {
+    background-color: whitesmoke;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
+.green-btn {
+    background-color: #6CCA7B;
+    color: #185622;
+    font-family: "Times New Roman";    
+    font-size: 25px;
+    font-weight: bold;
+    font-variant: small-caps;    
+    cursor:pointer;
+    border:none;
+    width:12vw;
+    height:24vw;    
+    border-radius: 10px;    
+}
+.green-btn:hover {
+    background-color: whitesmoke;
+}
+.green-btn:focus {
+    background-color: whitesmoke;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
+.plum-btn {
+    background-color: #D18EC3;
+    color: #69365E;
+    font-family: "Times New Roman";    
+    font-size: 25px;
+    font-weight: bold;
+    font-variant: small-caps;    
+    cursor:pointer;
+    border:none;
+    width:12vw;
+    height:24vw;    
+    border-radius: 10px;    
+}
+.plum-btn:hover {
+    background-color: whitesmoke;
+}
+.plum-btn:focus {
+    background-color: whitesmoke;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
+.peacock-btn {
+    background-color: #ACEFEB;
+    color: #56928E;
+    font-family: "Times New Roman";   
+    font-size: 25px;
+    font-weight: bold;
+    font-variant: small-caps;     
+    cursor:pointer;
+    border:none;
+    width:12vw;
+    height:24vw;        
+    border-radius: 10px;    
+}
+.peacock-btn:hover {
+    background-color: whitesmoke;
+}
+.peacock-btn:focus {
+    background-color: whitesmoke;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
+.white-btn {
+    background-color: #e0e0e0;
+    color: white;
+    font-family: "Times New Roman";    
+    font-size: 25px;
+    font-weight: bold;
+    font-variant: small-caps;    
+    cursor:pointer;
+    border:none;
+    width:12vw;
+    height:24vw;       
+    border-radius: 10px;    
+}
+.white-btn:hover {
+    background-color: whitesmoke;
+    color: #B1AEAE;
+}
+.white-btn:focus {
+    background-color: whitesmoke;
+    color: #B1AEAE;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+}
+
+
+.continue-btn {
+    background-color: rgb(13, 129, 9);
+    color: white;
+    cursor:pointer;
+    border:none;
+    /* width:12vw; */
+    /* height:24vw;        */
+}
+
