@@ -57,9 +57,9 @@ def home():
         create = request.form.get("create", False)
 
         if name == "":
-            return render_template("hello.html", error="Please enter a name.", code=code, name=name)
+            return render_template("home.html", error="Please enter a name.", code=code, name=name)
         if join != False and code == "":
-            return render_template("hello.html", error="Please enter a code.", code=code, name=name)
+            return render_template("home.html", error="Please enter a code.", code=code, name=name)
         if create != False:
             code = generate_unique_code(4)
             games[code] = {
@@ -70,13 +70,13 @@ def home():
             } #, "board": Board(...)}
             print(games[code]["available_characters"])
         elif join != False and code not in games:
-            return render_template("hello.html", error="Game does not exist", code=code, name=name)
+            return render_template("home.html", error="Game does not exist", code=code, name=name)
 
         session["game"] = code
         session["name"] = name
         return redirect(url_for("character"))
 
-    return render_template('hello.html')
+    return render_template('home.html')
 
 
 @app.route("/character", methods=["POST", "GET"])
