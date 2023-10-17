@@ -26,7 +26,6 @@ app.secret_key = 'your_secret_key_here'
 ## VARIABLES
 games = {}
 users = json.load(open("credentials.json"))
-# users = json.load(open("./code/credentials.json"))
 output_content = ""
 content = ["Content 1", "Content 2", "Content 3", "Content 4",]
 output_content = ""
@@ -72,7 +71,8 @@ def home():
                 "num_players": 0, 
                 "messages": [], 
                 "available_characters": deepcopy(CHARACTERS), 
-                "players": {} 
+                "players": {},
+                "board": deepcopy(ROOMS),
             } #, "board": Board(...)}
             print(games[code]["available_characters"])
         elif join != False and code not in games:
@@ -98,11 +98,13 @@ def character():
             print("\nCONTINUE\n")
             return render_template("game.html", error="Please enter a code.", character=character)
 
-    taken_characters = games[game]["players"].values()
+    taken_characters = list(games[game]["players"].values())
+    available_characters = {k: v for k, v in CHARACTERS.items() if k not in taken_characters}
+
     if game is None or session.get("game") is None or game not in games:
         return redirect(url_for("home"))
-    return render_template("character.html", game=game, name=name, taken_characters=taken_characters)
 
+    return render_template("character.html", game=game, name=name, characters=available_characters, taken_characters=taken_characters)
 
 @app.route("/game")
 @auth.login_required
@@ -178,6 +180,12 @@ def select_character(data):
     print(f"\n{session.get('name')} selected {character}")
     print(games[game]["players"])
     print(f"Characters Available: {games[game]['available_characters']}\n")
+
+    return redirect(url_for("view_board"))
+
+@socketio.on("view_board")
+def view_board(data):
+    return render_template("board.html", board=games[game]['board'])
 
 
 if __name__ == '__main__':

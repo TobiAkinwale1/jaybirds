@@ -108,7 +108,7 @@ h2,h5 {
     margin-right: auto;    
 }
 
-.scarlet-btn {
+.red-btn {
     background-color: #E7483D;
     color: #74150E;
     font-family: "Times New Roman";    
@@ -121,10 +121,10 @@ h2,h5 {
     height:24vw;
     border-radius: 10px;    
 }
-.scarlet-btn:hover {
+.red-btn:hover {
     background-color: whitesmoke;
 }
-.scarlet-btn:focus {
+.red-btn:focus {
     background-color: whitesmoke;
     border-color: black;
     border-width: 2px;
@@ -132,7 +132,7 @@ h2,h5 {
     border-radius: 10px;    
 }
 
-.mustard-btn {
+.yellow-btn {
     background-color: #E7CC3D;
     color: #8E7A0C;
     font-family: "Times New Roman";
@@ -145,11 +145,11 @@ h2,h5 {
     height:24vw;    
     border-radius: 10px;    
 }
-.mustard-btn:hover {
+.yellow-btn:hover {
     background-color: whitesmoke;
     color: #B68F08;
 }
-.mustard-btn:focus {
+.yellow-btn:focus {
     background-color: whitesmoke;
     border-color: black;
     border-width: 2px;
@@ -181,7 +181,7 @@ h2,h5 {
     border-radius: 10px;    
 }
 
-.plum-btn {
+.purple-btn {
     background-color: #D18EC3;
     color: #69365E;
     font-family: "Times New Roman";    
@@ -194,10 +194,10 @@ h2,h5 {
     height:24vw;    
     border-radius: 10px;    
 }
-.plum-btn:hover {
+.purple-btn:hover {
     background-color: whitesmoke;
 }
-.plum-btn:focus {
+.purple-btn:focus {
     background-color: whitesmoke;
     border-color: black;
     border-width: 2px;
@@ -205,7 +205,7 @@ h2,h5 {
     border-radius: 10px;    
 }
 
-.peacock-btn {
+.blue-btn {
     background-color: #ACEFEB;
     color: #56928E;
     font-family: "Times New Roman";   
@@ -218,10 +218,10 @@ h2,h5 {
     height:24vw;        
     border-radius: 10px;    
 }
-.peacock-btn:hover {
+.blue-btn:hover {
     background-color: whitesmoke;
 }
-.peacock-btn:focus {
+.blue-btn:focus {
     background-color: whitesmoke;
     border-color: black;
     border-width: 2px;
