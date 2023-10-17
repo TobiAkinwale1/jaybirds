@@ -131,7 +131,7 @@ h2,h5 {
     border-style: solid;
     border-radius: 10px;    
 }
-.scarlet-btn:disabled {
+.red-btn:disabled {
     background-color: white;
     color: whitesmoke;
     border-color: whitesmoke;
@@ -164,7 +164,7 @@ h2,h5 {
     border-style: solid;
     border-radius: 10px;    
 }
-.mustard-btn:disabled {
+.yellow-btn:disabled {
     background-color: white;
     color: whitesmoke;
     border-color: whitesmoke;
@@ -228,7 +228,7 @@ h2,h5 {
     border-style: solid;
     border-radius: 10px;    
 }
-.plum-btn:disabled {
+.purple-btn:disabled {
     background-color: white;
     color: whitesmoke;
     border-color: whitesmoke;
@@ -260,7 +260,7 @@ h2,h5 {
     border-style: solid;
     border-radius: 10px;    
 }
-.peacock-btn:disabled {
+.blue-btn:disabled {
     background-color: white;
     color: whitesmoke;
     border-color: whitesmoke;

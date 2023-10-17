@@ -44,3 +44,17 @@ For example:
 7. Hit `Join Game` or `Create Game`.
 
 8. Select your player out of the six options.
+
+
+
+To connect to the internet, install ngrok for your device. This is used to connect our local server to the internet. 
+https://ngrok.com/download
+
+To serve the webpage, run the following:
+export FLASK_APP=clue
+export FLASK_ENV=development
+flask run --host=0.0.0.0 -p 5000
+
+To connect your webpage to the broader internet (beyond your local network), run the following:
+ngrok http 5000
+

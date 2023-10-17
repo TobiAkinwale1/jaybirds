@@ -94,7 +94,7 @@ def character():
 
     if game is None or session.get("game") is None or game not in games:
         return redirect(url_for("home"))
-    return render_template("character.html", game=game, name=name, taken_characters=games[game]["taken_characters"])
+    return render_template("character.html", game=game, name=name, characters=games[game]["available_characters"], taken_characters=games[game]["taken_characters"])
 
 
 @app.route("/game")
