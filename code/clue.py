@@ -6,6 +6,12 @@ from flask_socketio import SocketIO, join_room, leave_room, send
 from string import ascii_uppercase
 from copy import deepcopy
 import random
+import sys
+import os
+
+# to accommodate if run from jaybirds directory
+if os.path.isdir('code'):
+    os.chdir(os.path.abspath('code'))
 
 from board import ROOMS, CHARACTERS, WEAPONS
 
