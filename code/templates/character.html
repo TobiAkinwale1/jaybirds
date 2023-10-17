@@ -1,19 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- <h4>Welcome to the game! {{game}}</h4> -->
 <form method="post" class="form">
     <div>
         <h2>Select a character!</h2>
         <h5>Player: {{name}}   |   Game Lobby: {{game}}</h5>
 
         <div class="character-box">
-            <button type="button" class="scarlet-btn" name="send" id="Miss Scarlet" onClick="choose('Miss Scarlet')">Miss Scarlet</button>
-            <button type="button" class="mustard-btn" name="send" id="Colonel Mustard" onClick="choose('Colonel Mustard')">Col. Mustard</button>
-            <button type="button" class="green-btn" name="send" id="Mr. Green" onClick="choose('Mr. Green')">Mr. Green</button>
-            <button type="button" class="plum-btn" name="send" id="Professor Plum" onClick="choose('Professor Plum')">Prof. Plum</button>
-            <button type="button" class="white-btn" name="send" id="Mrs. White" onClick="choose('Mrs. White')">Mrs. White</button>
-            <button type="button" class="peacock-btn" name="send" id="Mrs. Peacock" onClick="choose('Mrs. Peacock')">Mrs. Peacock</button>
+            {% for character, color in characters.items() %}
+                <button type="button" class="{{color}}-btn" name="send" id="{{character}}" onClick="choose('{{character}}')">{{character}}</button>
+            {% endfor %}
         </div>
         <div class="character-box">
             <button type="submit" class="continue-btn" name="continue" id="continue" onClick="sendCharacter()">Continue</button>

@@ -6,6 +6,12 @@ from flask_socketio import SocketIO, join_room, leave_room, send
 from string import ascii_uppercase
 from copy import deepcopy
 import random
+import sys
+import os
+
+# to accommodate if run from jaybirds directory
+if os.path.isdir('code'):
+    os.chdir(os.path.abspath('code'))
 
 from board import ROOMS, CHARACTERS, WEAPONS
 
@@ -59,9 +65,10 @@ def home():
             games[code] = {
                 "num_players": 0, 
                 "messages": [], 
-                "available_characters": deepcopy(CHARACTERS), 
                 "taken_characters": [], 
-                "players": {} 
+                "players": {},
+                "available_characters": deepcopy(CHARACTERS), 
+                "board": deepcopy(ROOMS),
             } #, "board": Board(...)}
             print(games[code]["available_characters"])
         elif join != False and code not in games:
@@ -96,7 +103,6 @@ def game():
     name = session.get("name")
     game = session.get("game")
     character = games[game]["players"][name]
-    # character = session.get("character")
     if game is None or session.get("game") is None or game not in games:
         return redirect(url_for("home"))
     return render_template("game.html", game=game, character=character, messages=games[game]["messages"])
@@ -168,6 +174,12 @@ def select_character(data):
     print(f"\n{session.get('name')} selected {character}")
     print(games[game]["players"])
     print(f"Characters Available: {games[game]['available_characters']}\n")
+
+    return redirect(url_for("view_board"))
+
+@socketio.on("view_board")
+def view_board(data):
+    return render_template("board.html", board=games[game]['board'])
 
 
 if __name__ == '__main__':
