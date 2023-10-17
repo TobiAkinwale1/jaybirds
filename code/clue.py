@@ -9,9 +9,9 @@ import random
 import sys
 import os
 
-# to accommodate if run from jaybirds directory
-if os.path.isdir('code'):
-    os.chdir(os.path.abspath('code'))
+# to accommodate this file being run anywhere
+current_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(current_dir)
 
 from board import ROOMS, CHARACTERS, WEAPONS
 
