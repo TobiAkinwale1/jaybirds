@@ -20,12 +20,6 @@ app.secret_key = 'your_secret_key_here'
 ## VARIABLES
 games = {}
 users = json.load(open("credentials.json"))
-# users = json.load(open("./code/credentials.json"))
-output_content = ""
-content = ["Content 1", "Content 2", "Content 3", "Content 4",]
-output_content = ""
-i=0
-SERVER_CONTENT = "SERVER CONTENT"
 
 
 def generate_unique_code(length):
@@ -66,6 +60,7 @@ def home():
                 "num_players": 0, 
                 "messages": [], 
                 "available_characters": deepcopy(CHARACTERS), 
+                "taken_characters": [], 
                 "players": {} 
             } #, "board": Board(...)}
             print(games[code]["available_characters"])
@@ -82,20 +77,17 @@ def home():
 @app.route("/character", methods=["POST", "GET"])
 @auth.login_required
 def character():
+    print("\nCHAR\n")
     name = session.get("name", "")
     game = session.get("game", "")
-    character = session.get("character", "")
     if request.method == "POST":
         cont = request.form.get("continue", False)
-        print(f"cont {cont}")
         if cont != False:
-            print("\nCONTINUE\n")
-            return render_template("game.html", error="Please enter a code.", character=character)
+            return redirect(url_for("game"))
 
-    taken_characters = games[game]["players"].values()
     if game is None or session.get("game") is None or game not in games:
         return redirect(url_for("home"))
-    return render_template("character.html", game=game, name=name, taken_characters=taken_characters)
+    return render_template("character.html", game=game, name=name, taken_characters=games[game]["taken_characters"])
 
 
 @app.route("/game")
@@ -104,6 +96,7 @@ def game():
     name = session.get("name")
     game = session.get("game")
     character = games[game]["players"][name]
+    # character = session.get("character")
     if game is None or session.get("game") is None or game not in games:
         return redirect(url_for("home"))
     return render_template("game.html", game=game, character=character, messages=games[game]["messages"])
@@ -125,7 +118,7 @@ def connect(auth):
     join_room(game)
     send({"name":name, "message": "has entered the game"}, to=game)
     games[game]["num_players"] += 1
-    games[game]["players"][name] = True
+    games[game]["players"][name] = None
     print(f"{name} joined game {game}")
 
 
@@ -134,7 +127,7 @@ def disconnect():
     game = session.get("game")
     name = session.get("name")
     leave_room(game)
-    if game in games and games[game]["num_players"] <= 1:
+    if game in games and games[game]["num_players"] < 1:
         del games[game]
 
     send({"name":name, "message": "has left the game"}, to=game)
@@ -167,7 +160,10 @@ def select_character(data):
     content = {
         "name": session.get("name"),
         "character": character,
+        "message": f"has chosen {character}"
     }
+    games[game]["taken_characters"].append(character)
+    session["character"] = character
     send(content, to=game)
     print(f"\n{session.get('name')} selected {character}")
     print(games[game]["players"])

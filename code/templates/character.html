@@ -16,7 +16,7 @@
             <button type="button" class="peacock-btn" name="send" id="Mrs. Peacock" onClick="choose('Mrs. Peacock')">Mrs. Peacock</button>
         </div>
         <div class="character-box">
-            <button type="button" class="continue-btn" name="send" id="continue" onClick="sendCharacter()">Continue</button>
+            <button type="submit" class="continue-btn" name="continue" id="continue" onClick="sendCharacter()">Continue</button>
         </div>
     </div>
 </form>
@@ -36,6 +36,7 @@
 
 {% for char in taken_characters %}
 <script type="text/javascript">
+    console.log("{{char}}")
     button = document.getElementById("{{char}}");
     button.disabled = true;
 </script>

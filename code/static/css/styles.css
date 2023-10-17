@@ -126,9 +126,17 @@ h2,h5 {
 }
 .scarlet-btn:focus {
     background-color: whitesmoke;
-    border-color: black;
+    border-color: #74150E;
     border-width: 2px;
     border-style: solid;
+    border-radius: 10px;    
+}
+.scarlet-btn:disabled {
+    background-color: white;
+    color: whitesmoke;
+    border-color: whitesmoke;
+    border-width: 2px;
+    border-style: dashed;
     border-radius: 10px;    
 }
 
@@ -151,9 +159,17 @@ h2,h5 {
 }
 .mustard-btn:focus {
     background-color: whitesmoke;
-    border-color: black;
+    border-color: #8E7A0C;
     border-width: 2px;
     border-style: solid;
+    border-radius: 10px;    
+}
+.mustard-btn:disabled {
+    background-color: white;
+    color: whitesmoke;
+    border-color: whitesmoke;
+    border-width: 2px;
+    border-style: dashed;
     border-radius: 10px;    
 }
 
@@ -175,9 +191,17 @@ h2,h5 {
 }
 .green-btn:focus {
     background-color: whitesmoke;
-    border-color: black;
+    border-color: #185622;
     border-width: 2px;
     border-style: solid;
+    border-radius: 10px;    
+}
+.green-btn:disabled {
+    background-color: white;
+    color: whitesmoke;
+    border-color: whitesmoke;
+    border-width: 2px;
+    border-style: dashed;
     border-radius: 10px;    
 }
 
@@ -199,9 +223,17 @@ h2,h5 {
 }
 .plum-btn:focus {
     background-color: whitesmoke;
-    border-color: black;
+    border-color: #69365E;
     border-width: 2px;
     border-style: solid;
+    border-radius: 10px;    
+}
+.plum-btn:disabled {
+    background-color: white;
+    color: whitesmoke;
+    border-color: whitesmoke;
+    border-width: 2px;
+    border-style: dashed;
     border-radius: 10px;    
 }
 
@@ -223,9 +255,17 @@ h2,h5 {
 }
 .peacock-btn:focus {
     background-color: whitesmoke;
-    border-color: black;
+    border-color: #56928E;
     border-width: 2px;
     border-style: solid;
+    border-radius: 10px;    
+}
+.peacock-btn:disabled {
+    background-color: white;
+    color: whitesmoke;
+    border-color: whitesmoke;
+    border-width: 2px;
+    border-style: dashed;
     border-radius: 10px;    
 }
 
@@ -249,9 +289,17 @@ h2,h5 {
 .white-btn:focus {
     background-color: whitesmoke;
     color: #B1AEAE;
-    border-color: black;
+    border-color: #e0e0e0;
     border-width: 2px;
     border-style: solid;
+}
+.white-btn:disabled {
+    background-color: white;
+    color: whitesmoke;
+    border-color: whitesmoke;
+    border-width: 2px;
+    border-style: dashed;
+    border-radius: 10px;    
 }
 
 
