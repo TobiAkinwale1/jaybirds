@@ -53,7 +53,7 @@ ROOMS: dict[str, Room] = {
         name = "Hall", 
         position = (0,2),
         adjacent_rooms = ["hallway_0", "hallway_3", "hallway_1"], 
-        type = "hallway",
+        type = "room",
         occupants = [] 
     ),    
     "Lounge": Room(
@@ -71,121 +71,121 @@ ROOMS: dict[str, Room] = {
         occupants = [] 
     ),    
     "Billiard Room": Room(
-        name = "Room", 
+        name = "Billiard Room", 
         position = (2,2),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["hallway_3", "hallway_6", "hallway_8", "hallway_5"], 
         type = "room",
         occupants = [] 
     ),        
     "Dining Room": Room(
-        name = "Room", 
+        name = "Dining Room", 
         position = (2,4),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["hallway_4", "hallway_9", "hallway_11"], 
         type = "room",
         occupants = [] 
     ),        
     "Conservatory": Room(
         name = "Conservatory", 
         position = (4,0),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["hallway_7", "hallway_10", "Lounge"], 
         type = "room",
         occupants = [] 
     ),        
     "Ballroom": Room(
         name = "Ballroom", 
         position = (4,2),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["hallway_8", "hallway_11", "hallway_9", "hallway_10"], 
         type = "room",
         occupants = [] 
     ),        
     "Kitchen": Room(
         name = "Kitchen", 
         position = (4,4),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["hallway_10", "hallway_11", "Study"], 
         type = "room",
         occupants = [] 
     ),        
     "hallway_0": Room(
         name = "hallway_0", 
         position = (0,1),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Study", "Hall"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_1": Room(
         name = "hallway_1", 
         position = (0,3),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Hall", "Lounge"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_2": Room(
         name = "hallway_2", 
         position = (1,0),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Study", "Library"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_3": Room(
         name = "hallway_3", 
         position = (1,2),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Hall", "Billiard Room"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_4": Room(
         name = "hallway_4", 
         position = (1,4),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Lounge", "Dining Room"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_5": Room(
         name = "hallway_5", 
         position = (2,1),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Library", "Billiard Room"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_6": Room(
         name = "hallway_6", 
         position = (2,3),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Billiard Room"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_7": Room(
         name = "hallway_7", 
         position = (3,0),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Library", "Conservatory"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_8": Room(
         name = "hallway_8", 
         position = (3,2),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Billiard Room", "Ballroom"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_9": Room(
         name = "hallway_9", 
         position = (3,4),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Dining Room", "Ballroom"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_10": Room(
         name = "hallway_10", 
         position = (4,1),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Conservatory", "Ballroom"], 
         type = "hallway",
         occupants = [] 
     ),        
     "hallway_11": Room(
         name = "hallway_11", 
         position = (4,3),
-        adjacent_rooms = ["", "", ""], 
+        adjacent_rooms = ["Ballroom", "Kitchen"], 
         type = "hallway",
         occupants = [] 
     ),        
