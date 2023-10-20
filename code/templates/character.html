@@ -28,6 +28,11 @@
     const sendCharacter = () => {
         socketio.emit("select_character", {character: character})        
     };
+
+    // Listen for the character_selected event
+    socketio.on("character_selected", function() {
+        window.location.href = "{{ url_for('game') }}";  // Redirect to the 'game' page
+    });
 </script>
 
 {% for char in taken_characters %}

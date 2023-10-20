@@ -127,24 +127,7 @@ def game():
         return redirect(url_for("home"))
     
     ## RENDER THE GAME PAGE
-    return render_template("game.html", game=game_code, character=character, messages=games[game_code]["messages"])
-
-@app.route("/view_board")
-@auth.login_required
-def view_board():
-    print("HERE")
-    game = session.get("game")
-    if game is None or game not in games:
-        return redirect(url_for("home"))
-
-    center_x, center_y = 2, 2  # Center of the 5x5 board
-    board_to_display = {}
-    for key, value in ROOMS.items():
-        pos_x, pos_y = value.position
-        if 0 <= pos_x - center_x < 3 and 0 <= pos_y - center_y < 3:
-            board_to_display[key] = value
-
-    return render_template("board.html", board=board_to_display)
+    return render_template("game.html", game=game_code, character=character, messages=games[game_code]["messages"], board=ROOMS)
 
 
 #########################
@@ -232,13 +215,9 @@ def select_character(data):
     # print(games[game_code]["players"])
     # print(f"Characters Available: {games[game_code]['available_characters'].keys()}\n")
 
-    return redirect(url_for("game"))
+    # return redirect(url_for("game"))
     # return redirect(url_for("view_board"))
-
-
-@socketio.on("view_board")
-def view_board(data):
-    return render_template("board.html", board=games[game_code]['board'])
+    socketio.emit("character_selected", room=request.sid)
 
 
 if __name__ == '__main__':

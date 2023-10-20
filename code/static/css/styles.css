@@ -302,7 +302,6 @@ h2,h5 {
     border-radius: 10px;    
 }
 
-
 .continue-btn {
     background-color: rgb(13, 129, 9);
     color: white;
@@ -312,3 +311,36 @@ h2,h5 {
     /* height:24vw;        */
 }
 
+.flex-container {
+    display: flex;
+}
+
+.game-box {
+    flex: 1;
+    padding: 20px;
+}
+
+.board-box {
+    flex: 2;
+    padding: 20px;
+}
+
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 10px;
+}
+
+.board-cell {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.room-name {
+    font-weight: bold;
+}
+
+.adjacent-rooms {
+    color: #555;
+}

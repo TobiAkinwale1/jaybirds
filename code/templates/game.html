@@ -1,18 +1,35 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<div class="message-box">
-    <h2>GAME {{game}}: {{character}}</h2>
-    <div class="messages" id="messages"></div>
-    <div class="inputs">
-        <input
-            type="text"
-            rows="3"
-            placeholder="Message"
-            name="message"
-            id="message"
-        />
-        <button type="button" name="send" id="send-btn" onClick="sendMessage()">Send</button>
+<div class="flex-container">
+    <div class="game-box">
+        <!-- game content -->
+        <div class="message-box">
+            <h2>GAME {{game}}: {{character}}</h2>
+            <div class="messages" id="messages"></div>
+            <div class="inputs">
+                <input
+                    type="text"
+                    rows="3"
+                    placeholder="Message"
+                    name="message"
+                    id="message"
+                />
+                <button type="button" name="send" id="send-btn" onClick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <div class="board-box">
+        <!-- board content -->
+        <h2>View Board</h2>
+        <div class="board-grid">
+            {% for room, properties in board.items() %}
+            <div class="board-cell" style="grid-column: {{ properties.position[1] + 1 }}; grid-row: {{ properties.position[0] + 1 }};">
+                <div class="room-name">{{ room }}</div>
+                <div class="room-position">Position: {{ properties.position }}</div>
+                <div class="adjacent-rooms">Adjacent Rooms: {{ properties.adjacent_rooms }}</div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
