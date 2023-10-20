@@ -20,15 +20,14 @@
     </div>
     <div class="board-box">
         <!-- board content -->
-        <h2>View Board</h2>
         <div class="board-grid">
             {% for room, properties in board.items() %}
-            <div class="board-cell" style="grid-column: {{ properties.position[1] + 1 }}; grid-row: {{ properties.position[0] + 1 }};">
+            <button class="board-cell {% if properties.type == 'room' %}room{% else %}hallway{% endif %}" style="grid-column: {{ properties.position[1] + 1 }}; grid-row: {{ properties.position[0] + 1 }};">
                 <div class="room-name">{{ room }}</div>
                 <div class="room-position">Position: {{ properties.position }}</div>
                 <div class="adjacent-rooms">Adjacent Rooms: {{ properties.adjacent_rooms }}</div>
-            </div>
-            {% endfor %}
+            </button>
+        {% endfor %}
         </div>
     </div>
 </div>

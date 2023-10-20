@@ -332,15 +332,21 @@ h2,h5 {
 }
 
 .board-cell {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
+    border: 1px solid black;
+    padding: 0;
+    width: 120px;
+    height: 120px;
+}
+
+.room {
+    background-color: rgb(81, 50, 116);
+    color: white;
+}
+
+.hallway {
+    background-color: rgb(231, 176, 149);
 }
 
 .room-name {
     font-weight: bold;
-}
-
-.adjacent-rooms {
-    color: #555;
 }
