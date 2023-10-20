@@ -7,12 +7,12 @@
         <h5>Player: {{name}}   |   Game Lobby: {{game}}</h5>
 
         <div class="character-box">
-            {% for character, color in characters.items() %}
-                <button type="button" class="{{color}}-btn" name="send" id="{{character}}" onClick="choose('{{character}}')">{{character}}</button>
+            {% for key, value in characters.items() %}
+                <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="choose('{{ value.name }}')">{{ value.name }}</button>
             {% endfor %}
         </div>
         <div class="character-box">
-            <button type="submit" class="continue-btn" name="continue" id="continue" onClick="sendCharacter()">Continue</button>
+            <button type="button" class="continue-btn" name="send" id="continue" onClick="sendCharacter()">Continue</button>
         </div>
     </div>
 </form>
@@ -32,7 +32,6 @@
 
 {% for char in taken_characters %}
 <script type="text/javascript">
-    console.log("{{char}}")
     button = document.getElementById("{{char}}");
     button.disabled = true;
 </script>

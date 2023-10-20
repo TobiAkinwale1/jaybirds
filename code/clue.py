@@ -9,9 +9,9 @@ import random
 import sys
 import os
 
-# to accommodate if run from jaybirds directory
-if os.path.isdir('code'):
-    os.chdir(os.path.abspath('code'))
+# to accommodate this file being run anywhere
+current_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(current_dir)
 
 from board import ROOMS, CHARACTERS, WEAPONS
 
@@ -129,6 +129,23 @@ def game():
     ## RENDER THE GAME PAGE
     return render_template("game.html", game=game_code, character=character, messages=games[game_code]["messages"])
 
+@app.route("/view_board")
+@auth.login_required
+def view_board():
+    print("HERE")
+    game = session.get("game")
+    if game is None or game not in games:
+        return redirect(url_for("home"))
+
+    center_x, center_y = 2, 2  # Center of the 5x5 board
+    board_to_display = {}
+    for key, value in ROOMS.items():
+        pos_x, pos_y = value.position
+        if 0 <= pos_x - center_x < 3 and 0 <= pos_y - center_y < 3:
+            board_to_display[key] = value
+
+    return render_template("board.html", board=board_to_display)
+
 
 #########################
 ## MESSAGING FUNCTIONS ##
@@ -213,7 +230,7 @@ def select_character(data):
     send(content, to=game_code)
     # print(f"\n{session.get('name')} selected {character}")
     # print(games[game_code]["players"])
-    # print(f"Characters Available: {games[game_code]['available_characters']}\n")
+    # print(f"Characters Available: {games[game_code]['available_characters'].keys()}\n")
 
     return redirect(url_for("game"))
     # return redirect(url_for("view_board"))
