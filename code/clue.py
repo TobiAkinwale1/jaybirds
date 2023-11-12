@@ -13,7 +13,8 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_dir)
 
-from board import ROOMS, CHARACTERS, WEAPONS
+from board import Board, CHARACTERS
+from game import Game
 
 
 ## FLASK SETUP
@@ -76,7 +77,7 @@ def home():
                 "taken_characters": [], 
                 "players": {},
                 "available_characters": deepcopy(CHARACTERS), 
-                "board": deepcopy(ROOMS),
+                "board": deepcopy(Board.ROOMS),
             } #, "board": Board(...)}
             # print(games[code]["available_characters"])
         ## WARN USER TRYING TO JOIN A NON-EXISTANT GAME
@@ -127,7 +128,7 @@ def game():
         return redirect(url_for("home"))
     
     ## RENDER THE GAME PAGE
-    return render_template("game.html", game=game_code, character=character, messages=games[game_code]["messages"], board=ROOMS)
+    return render_template("game.html", game=game_code, character=character, messages=games[game_code]["messages"], board=Board.ROOMS)
 
 
 #########################
