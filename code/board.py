@@ -6,10 +6,12 @@ from copy import deepcopy
 class Character:
     name: str
     color: str
+    starting_room: str
 
-    def __init__(self, name, color):
+    def __init__(self, name:str, color:str, starting_room:str) -> None:
         self.name = name
         self.color = color
+        self.starting_room = starting_room
 
 
 class Room:
@@ -38,24 +40,6 @@ class Room:
     def remove_occupant(self, player:str):
         if player in self.occupants:
             self.occupants.remove(player)
-
-CHARACTERS: dict[str, Character] = {
-    "Colonel Mustard": Character(name="Colonel Mustard", color="yellow"),
-    "Miss Scarlet": Character(name="Miss Scarlet", color="red"),
-    "Professor Plum": Character(name="Professor Plum", color="purple"),
-    "Mr. Green": Character(name="Mr. Green", color="green"),
-    "Mrs. White": Character(name="Mrs. White", color="white"),
-    "Mrs. Peacock": Character(name="Mrs. Peacock", color="blue"),
-}
-
-WEAPONS = [
-    "Rope",
-    "Lead Pipe",
-    "Knife",
-    "Wrench",
-    "Candlestick",
-    "Revolver",
-]
 
 
 class Board:
@@ -210,6 +194,15 @@ class Board:
         ),        
     }
 
+    CHARACTERS: dict[str, Character] = {
+        "Colonel Mustard": Character(name="Colonel Mustard", color="yellow", starting_room="hallway_4"),
+        "Miss Scarlet": Character(name="Miss Scarlet", color="red", starting_room="hallway_1"),
+        "Professor Plum": Character(name="Professor Plum", color="purple", starting_room="hallway_2"),
+        "Mr. Green": Character(name="Mr. Green", color="green", starting_room="hallway_10"),
+        "Mrs. White": Character(name="Mrs. White", color="white", starting_room="hallway_11"),
+        "Mrs. Peacock": Character(name="Mrs. Peacock", color="blue", starting_room="hallway_7"),
+    }
+
     def __init__(self, players:dict) -> None:
 
         self.rooms = deepcopy(self.ROOMS)
@@ -223,8 +216,8 @@ class Board:
         ])
 
         for player, character in players.items():
-            starting_room = CHARACTERS[character].starting_room
-            self.player_locations = {player: starting_room}
+            starting_room = self.CHARACTERS[character].starting_room
+            self.player_locations[player] = starting_room
 
 
     def get_location(self, player:str):
@@ -247,7 +240,7 @@ class Board:
 
         ## ONLY ADD ROOMS AND UNOCCUPIED HALLWAYS
         for room in possible_rooms:
-            if room.type == "hallway" and len(room.occupants) > 0:
+            if room.type == "hallway" and room.get_occupied():
                 continue
             adjacent_rooms.append(room.name)
         

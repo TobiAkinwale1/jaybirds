@@ -13,7 +13,7 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_dir)
 
-from board import Board, CHARACTERS
+from board import Board
 from game import Game
 
 
@@ -25,14 +25,14 @@ app.secret_key = 'your_secret_key_here'
 
 
 ## VARIABLES
-games = {}
 users = json.load(open("credentials.json"))
+debug = True
 
 ## GENERATE GAME CODES
 def generate_unique_code(length):
     while True:
-        game = "".join(random.choices(ascii_uppercase, k=length))
-        if game not in games: return game
+        code = "".join(random.choices(ascii_uppercase, k=length))
+        if Game.lookup(code) is None: return code
 
 ## AUTHENTICATE USERNAME AND PASSWORD
 @auth.verify_password
@@ -71,17 +71,10 @@ def home():
         ## GENERATE A NEW GAME 
         if create != False:
             code = generate_unique_code(4)
-            games[code] = {
-                "num_players": 0, 
-                "messages": [], 
-                "taken_characters": [], 
-                "players": {},
-                "available_characters": deepcopy(CHARACTERS), 
-                "board": deepcopy(Board.ROOMS),
-            } #, "board": Board(...)}
-            # print(games[code]["available_characters"])
+            Game.create(code=code)
         ## WARN USER TRYING TO JOIN A NON-EXISTANT GAME
-        elif join != False and code not in games:
+        elif join != False and Game.lookup(code) is None:
+            print("\nGAME DOES NOT EXIST\n")
             return render_template("home.html", error="Game does not exist", code=code, name=name)
 
         ## ADD USER NAME AND GAME CODE TO THE SESSION DICT (CLIENT SIDE)
@@ -100,6 +93,9 @@ def character():
     name = session.get("name", "")
     game_code = session.get("game_code", "")
 
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nCHAR SESSION {session}\n")
+
     ## REDIRECT TO THE GAME PAGE WHEN THE USER HITS CONTINUE
     if request.method == "POST":
         cont = request.form.get("continue", False)
@@ -107,11 +103,13 @@ def character():
             return redirect(url_for("game"))
 
     ## REDIRECT HOME IF USER TRIES JOINING A GAME THAT DOESN'T EXIST
-    if game_code is None or session.get("game_code") is None or game_code not in games:
+    if game_code is None or session.get("game_code") is None or Game.lookup(game_code) is None:
         return redirect(url_for("home"))
 
     ## RENDER THE SELECTION PAGE
-    return render_template("character.html", game=game_code, name=name, characters=games[game_code]["available_characters"], taken_characters=games[game_code]["taken_characters"])
+    game = Game.lookup(game_code)
+    return render_template("character.html", game=game_code, name=name, characters=game.get_available_characters())
+    # return render_template("character.html", game=game_code, name=name, characters=games[game_code]["available_characters"], taken_characters=games[game_code]["taken_characters"])
 
 
 ## GAME BOARD PAGE
@@ -121,14 +119,21 @@ def game():
     ## PULL DATA FROM SESSION DICT
     name = session.get("name")
     game_code = session.get("game_code")
-    character = games[game_code]["players"][name]
+    game = Game.lookup(game_code)
     
     ## REDIRECT HOME IF USER TRIES JOINING A GAME THAT DOESN'T EXIST
-    if game_code is None or session.get("game_code") is None or game_code not in games:
+    if game_code is None or session.get("game_code") is None or game is None:
         return redirect(url_for("home"))
     
+    ## DEBUG STATEMENTS
+    if debug: 
+        print(f"\nGAME SESSION {session}\n")
+        print(f"\nSERVE GAME PAGE {name}\n")
+        print(game.players)
+    
     ## RENDER THE GAME PAGE
-    return render_template("game.html", game=game_code, character=character, messages=games[game_code]["messages"], board=Board.ROOMS)
+    character = game.get_player(name).character_name
+    return render_template("game.html", game=game_code, character=character, messages=game.get_messages(), board=Board.ROOMS)
 
 
 #########################
@@ -141,19 +146,24 @@ def connect(auth):
     ## PULL DATA FROM SESSION DICT
     game_code = session.get("game_code")
     name = session.get("name")
+    game = Game.lookup(game_code)
 
     ## HANDLE INVALID GAME CODES
-    if not game_code or not name: return
-    if game_code not in games: 
+    if not game_code or not name: 
+        return
+    if game is None: 
         leave_room(game_code)
         return
+    
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nCONNECT SESSION {session}\n")
 
     ## ADD USER TO GAME AND SEND MESSAGE TO PLAYERS
     join_room(game_code)
     send({"name":name, "message": "has entered the game"}, to=game_code)
     ## UPDATE GAME DICT WITH PLAYER INFO
-    games[game_code]["num_players"] += 1
-    games[game_code]["players"][name] = None
+    # games[game_code]["num_players"] += 1
+    # games[game_code]["players"][name] = None
     print(f"{name} joined game {game_code}")
 
 ## LEAVES A GAME ROOM
@@ -163,10 +173,13 @@ def disconnect():
     game_code = session.get("game_code")
     name = session.get("name")
     leave_room(game_code)
+    
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nDISCONNECT SESSION {session}\n")
 
-    ## REMOVE GAME IF ALL PLAYERS LEAVE
-    if game_code in games and games[game_code]["num_players"] < 1:
-        del games[game_code]
+    # ## REMOVE GAME IF ALL PLAYERS LEAVE
+    # if game_code in games and games[game_code]["num_players"] < 1:
+    #     del games[game_code]
 
     ## SEND MESSAGE TO GAME LOBBY WHEN A USER LEAVES
     send({"name":name, "message": "has left the game"}, to=game_code)
@@ -177,7 +190,11 @@ def disconnect():
 def message(data):
     ## PULL GAME CODE FROM SESSION DICT
     game_code = session.get("game_code")
-    if game_code not in games: return
+    game = Game.lookup(game_code)
+    if game is None: return
+    
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nMESSAGE SESSION {session}\n")
     
     ## BUILD MESSAGE FROM ARGUMENTS
     content = {
@@ -186,7 +203,7 @@ def message(data):
     }
     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
     send(content, to=game_code)
-    games[game_code]["messages"].append(content)
+    game.add_message(content)
     print(f"{session.get('name')} said {data['data']}")
 
 ## SEND CHARACTER SELECTION TO ALL OTHER USERS
@@ -195,15 +212,23 @@ def select_character(data):
     ## PULL DATA FROM SESSION DICT
     name = session.get("name")
     game_code = session.get("game_code")
-    if game_code not in games: return
-
+    game = Game.lookup(game_code)
+    if game is None: return
+    
     ## UPDATE GAME DATA WITH SELECTED CHARACTER
     character = [data["character"]][0]
     session["character"] = character
-    games[game_code]["players"][name] = character
-    ## REMOVE CHARACTER FROM AVAILABLE SET
-    del games[game_code]["available_characters"][character]
-    games[game_code]["taken_characters"].append(character)
+
+    ## DEBUG STATEMENTS
+    if debug: 
+        print(f"\nSELECT CHAR SESSION {session}\n")
+        print(f"\nCHARACTER SELECTED {name}\n")
+        print(game.players)
+
+    ## UPDATE GAME PLAYER ATTRIBUTES
+    game.add_player(name, character)
+    game.remove_available_character(character)
+
     ## BUILD CHARACTER SELECTION MESSAGE
     content = {
         "name": session.get("name"),
@@ -212,13 +237,75 @@ def select_character(data):
     }
     ## SEND CHARACTER SELECTION MESSAGE TO PLAYERS
     send(content, to=game_code)
-    # print(f"\n{session.get('name')} selected {character}")
-    # print(games[game_code]["players"])
-    # print(f"Characters Available: {games[game_code]['available_characters'].keys()}\n")
-
-    # return redirect(url_for("game"))
-    # return redirect(url_for("view_board"))
     socketio.emit("character_selected", room=request.sid)
+
+## SEND A MESSAGE TO ALL USERS
+@socketio.on("startGame")
+def start_game(data):
+    ## PULL GAME CODE FROM SESSION DICT
+    name = session.get('name')
+    game_code = session.get("game_code")
+    game = Game.lookup(game_code)
+    if game is None: return
+    
+    ## STEP GAME
+    player = game.step_turn()
+    comm_turn(player)
+    prompt_move(player)
+
+
+    ## DEBUG STATEMENTS
+    if debug: 
+        print(f"\nSTART SESSION {session}\n")
+        print(f"\nCHARACTER SELECTED {name}\n")
+        print(game.turn)
+
+    ## BUILD MESSAGE FROM ARGUMENTS
+    content = {
+        "name": session.get("name"),
+        "message": "GAME STARTED",
+    }
+    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    send(content, to=game_code)
+    # games[game_code]["messages"].append(content)
+    game.add_message(content)
+    print(f"{name} said {data['data']}")
+
+
+## SEND A TURN TO ALL USERS
+def comm_turn(player:str):
+    ## PULL GAME CODE FROM SESSION DICT
+    game_code = session.get("game_code")
+    game = Game.lookup(game_code)
+    if game is None: return
+    
+    ## BUILD MESSAGE FROM ARGUMENTS
+    content = {
+        "name": player,
+    }
+    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    send(content, to=game_code)
+    game.add_message(content)
+
+## PROMPT MOVE TO ACTIVE PLAYER
+def prompt_move(player:str):
+    ## PULL GAME CODE FROM SESSION DICT
+    game_code = session.get("game_code")
+    game = Game.lookup(game_code)
+    if game is None: return
+    
+    ## BUILD MESSAGE FROM ARGUMENTS
+    content = {
+        "name": session.get("name"),
+    }
+    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    send(content, to=game_code)
+    game.add_message(content)
+
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -230,8 +317,9 @@ if __name__ == '__main__':
 
 
 
-
-# ## export FLASK_APP=clue
-# ## export FLASK_ENV=development
-# ## flask run --host=0.0.0.0 -p 5001
-# ngrok http <port>
+'''
+export FLASK_APP=clue
+export FLASK_ENV=development
+flask run --host=0.0.0.0 -p 5001
+ngrok http <port>
+'''

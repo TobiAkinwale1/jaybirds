@@ -61,6 +61,19 @@
     width: 20vw;
     align-items: stretch;
 }
+.banner {
+    border-color: whitesmoke;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;
+    background-color: rgb(9, 124, 9);
+    color: whitesmoke;    
+    /* height: 80vh; */
+    display: flex;
+    flex-direction: column;
+    /* width: 20vw; */
+    align-items: stretch;
+}
 
 .messages {
     overflow-y: scroll;
@@ -339,12 +352,12 @@ h2,h5 {
 }
 
 .room {
-    background-color: rgb(81, 50, 116);
+    background-color: rgb(40, 90, 155);
     color: white;
 }
 
 .hallway {
-    background-color: rgb(231, 176, 149);
+    background-color: rgb(175, 214, 243);
 }
 
 .room-name {

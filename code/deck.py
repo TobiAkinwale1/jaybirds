@@ -15,15 +15,7 @@ class Deck:
             "Revolver",
         ]
         
-        self.characters = [
-            "Colonel Mustard",
-            "Miss Scarlet",
-            "Professor Plum",
-            "Mr. Green",
-            "Mrs. White",
-            "Mrs. Peacock",
-        ]
-        
+        self.characters = [char for char in Board.CHARACTERS]
         self.rooms = [room for room in Board.ROOMS if "hallway" not in room]
 
 
