@@ -1,8 +1,7 @@
-
-
+from copy import deepcopy
 from xml.dom import NotFoundErr
 from player import Player
-from board import Board
+from board import Board, CHARACTERS
 from deck import Deck
 
 
@@ -16,13 +15,17 @@ class Game:
         Game.games[code] = self
 
         ## REFERENCES
-        # self.board = Board()
+        self.board = Board()
         self.deck = Deck()
 
         ## ATTRIBUTES
         self.code = code
         self.turn = None
+        self.messages = []
         self.players = {}
+        self.num_players = 0
+        self.taken_characters = []
+        self.available_characters = deepcopy(CHARACTERS)
         self.solution = self.deck.draw(replace=False)
 
         ## Internal variables for stepping turn
@@ -46,7 +49,16 @@ class Game:
     def end_game(self, name):
         print(f"{name} solved the case!")
         print(f"They discovered that {self.solution[1]} commited the murder in the {self.solution[0]} with a {self.solution[2]}")
+    
+    @classmethod
+    def del_game(cls, code:str):
+        del cls.games[code]
 
+    @classmethod
+    def add_player(cls, code:str, name:str):
+        game = cls.lookup(code)
+        game.players[name] = None
+        game.num_players += 1
 
     @classmethod
     def set_player(cls, code:str, name:str, char:str):
@@ -57,6 +69,8 @@ class Game:
             characterName=char,
             hand=hand
         )
+        game.taken_characters.append(char)
+        del game.available_characters[char]
 
     @classmethod
     def lookup(cls, code:str):

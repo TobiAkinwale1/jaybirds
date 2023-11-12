@@ -210,21 +210,21 @@ class Board:
         ),        
     }
 
-    def __init__(self, players:dict) -> None:
+    # def __init__(self, players:dict) -> None:
 
-        self.rooms = deepcopy(self.ROOMS)
+        # self.rooms = deepcopy(self.ROOMS)
 
-        self.grid = np.array([
-            [0, 0, 0, 0, 0],
-            [0, 1, 0, 1, 0],
-            [0, 0, 0, 0, 0],
-            [0, 1, 0, 1, 0],
-            [0, 0, 0, 0, 0],
-        ])
+        # self.grid = np.array([
+        #     [0, 0, 0, 0, 0],
+        #     [0, 1, 0, 1, 0],
+        #     [0, 0, 0, 0, 0],
+        #     [0, 1, 0, 1, 0],
+        #     [0, 0, 0, 0, 0],
+        # ])
 
-        for player, character in players.items():
-            starting_room = CHARACTERS[character].starting_room
-            self.player_locations = {player: starting_room}
+        # for player, character in players.items():
+        #     starting_room = CHARACTERS[character].starting_room
+        #     self.player_locations = {player: starting_room}
 
 
     def get_location(self, player:str):
