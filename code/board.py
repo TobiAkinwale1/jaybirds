@@ -22,6 +22,19 @@ class Room:
         self.adjacent_rooms = adjacent_rooms
         self.type = type
         self.occupants = occupants
+        
+    def get_adjacent_rooms():
+        return self.adjacent_rooms
+        
+    def get_occupied():
+        return len(self.occupants)>0
+        
+    def add_occupant(player:str):
+        occupants.add(player)
+      
+    def remove_occupant(player:str):
+        if player in occupants:
+            occupants.remove(player)
 
 CHARACTERS: dict[str, Character] = {
     "Colonel Mustard": Character(name="Colonel Mustard", color="yellow"),
