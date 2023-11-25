@@ -35,11 +35,4 @@
     });
 </script>
 
-{% for char in taken_characters %}
-<script type="text/javascript">
-    button = document.getElementById("{{char}}");
-    button.disabled = true;
-</script>
-{% endfor %}
-
 {% endblock %}

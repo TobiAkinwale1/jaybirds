@@ -203,10 +203,10 @@ class Board:
         "Mrs. Peacock": Character(name="Mrs. Peacock", color="blue", starting_room="hallway_7"),
     }
 
-    def __init__(self, players:dict) -> None:
+    def __init__(self) -> None:
 
         self.rooms = deepcopy(self.ROOMS)
-
+        self.player_locations = {}
         self.grid = np.array([
             [0, 0, 0, 0, 0],
             [0, 1, 0, 1, 0],
@@ -215,10 +215,11 @@ class Board:
             [0, 0, 0, 0, 0],
         ])
 
-        for player, character in players.items():
-            starting_room = self.CHARACTERS[character].starting_room
-            self.player_locations[player] = starting_room
 
+    def add_player(self, player:str, character:str):
+        starting_room = self.CHARACTERS[character].starting_room
+        self.rooms[starting_room].occupants.append(player)
+        self.player_locations[player] = starting_room
 
     def get_location(self, player:str):
         return self.player_locations[player]
@@ -226,11 +227,11 @@ class Board:
     def move_player(self, player:str, room:str):
         ## MOVE PLAYER OUT OF OLD ROOM
         old_room = self.player_locations[player]
-        self.rooms[old_room].occupants.pop(player)
+        self.rooms[old_room].occupants.remove(player)
         
         ## MOVE PLAYER INTO NEW ROOM
         self.player_locations[player] = room
-        self.rooms[room].occupants.push(player)
+        self.rooms[room].occupants.append(player)
 
     def get_adjacent_rooms(self, player):
         ## GET ALL POSSIBLE ADJACENT ROOMS
@@ -239,42 +240,10 @@ class Board:
         possible_rooms = self.rooms[current_room].adjacent_rooms
 
         ## ONLY ADD ROOMS AND UNOCCUPIED HALLWAYS
-        for room in possible_rooms:
+        for room_name in possible_rooms:
+            room = self.rooms[room_name]
             if room.type == "hallway" and room.get_occupied():
                 continue
             adjacent_rooms.append(room.name)
         
         return adjacent_rooms
-
-
-
-
-
-
-        # for room in self.ROOMS
-
-
-        # valid_spaces = np.array([
-        #     [1, 1, 1, 1, 1],
-        #     [1, 0, 1, 0, 1],
-        #     [1, 1, 1, 1, 1],
-        #     [1, 0, 1, 0, 1],
-        #     [1, 1, 1, 1, 1],
-        # ])
-        # occupied_spaces = np.array([
-        #     ["", "", "", "Miss Scarlet", ""],
-        #     ["Professor Plum", "", "", "", "Colonel Mustard"],
-        #     ["", "", "", "", ""],
-        #     ["Mrs. Peacock", "", "", "", ""],
-        #     ["", "Mr. Green", "", "Mrs. White", ""],
-        # ])
-
-        # rooms = [
-        #     ["Study", 1, "Hall", 1, "Lounge"],
-        #     [1, 0, 1, 0, 1],
-        #     ["Library", 1, "Billiard Room", 1, "Dining Room"],
-        #     [1, 0, 1, 0, 1],
-        #     ["Conservatory", 1, "Ballroom", 1, "Kitchen"],
-        # ]
-
-    # def update(self, )

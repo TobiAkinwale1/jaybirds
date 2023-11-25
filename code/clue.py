@@ -4,7 +4,6 @@ from flask import Flask, session, request, redirect, url_for, jsonify, render_te
 from flask_httpauth import HTTPBasicAuth
 from flask_socketio import SocketIO, join_room, leave_room, send
 from string import ascii_uppercase
-from copy import deepcopy
 import random
 import sys
 import os
@@ -92,6 +91,7 @@ def character():
     ## PULL DATA FROM SESSION DICT
     name = session.get("name", "")
     game_code = session.get("game_code", "")
+    game_instance = Game.lookup(game_code)
 
     ## DEBUG STATEMENTS
     if debug: print(f"\nCHAR SESSION {session}\n")
@@ -131,10 +131,15 @@ def game():
         print(f"\nSERVE GAME PAGE {name}\n")
         print(game.players)
     
+    ## GET AVAILABLE MOVES
+    rooms = game.board.get_adjacent_rooms(name)
+
     ## RENDER THE GAME PAGE
     character = game.get_player(name).character_name
-    return render_template("game.html", game=game_code, character=character, messages=game.get_messages(), board=Board.ROOMS)
+    return render_template("game.html", game=game_code, character=character, messages=game.get_messages(), board=game.board.rooms, hand=game.players[name].hand, rooms=rooms)
 
+    # ## RENDER THE GAME PAGE
+    # return render_template("game.html", game=game_code, character=game_instance.players[name].playerName, messages=game_instance.messages, board=game_instance.board.ROOMS, hand=game_instance.players[name].hand)
 
 #########################
 ## MESSAGING FUNCTIONS ##
@@ -144,8 +149,8 @@ def game():
 @socketio.on("connect")
 def connect(auth):
     ## PULL DATA FROM SESSION DICT
-    game_code = session.get("game_code")
     name = session.get("name")
+    game_code = session.get("game_code")
     game = Game.lookup(game_code)
 
     ## HANDLE INVALID GAME CODES
@@ -160,18 +165,19 @@ def connect(auth):
 
     ## ADD USER TO GAME AND SEND MESSAGE TO PLAYERS
     join_room(game_code)
-    send({"name":name, "message": "has entered the game"}, to=game_code)
+    # send({"name":name, "message": "has entered the game"}, to=game_code)
     ## UPDATE GAME DICT WITH PLAYER INFO
     # games[game_code]["num_players"] += 1
     # games[game_code]["players"][name] = None
-    print(f"{name} joined game {game_code}")
+    # print(f"{name} joined game {game_code}")
 
 ## LEAVES A GAME ROOM
 @socketio.on("disconnect")
 def disconnect():
     ## PULL DATA FROM SESSION DICT
-    game_code = session.get("game_code")
     name = session.get("name")
+    game_code = session.get("game_code")
+    game_instance = Game.lookup(game_code)
     leave_room(game_code)
     
     ## DEBUG STATEMENTS
@@ -182,8 +188,8 @@ def disconnect():
     #     del games[game_code]
 
     ## SEND MESSAGE TO GAME LOBBY WHEN A USER LEAVES
-    send({"name":name, "message": "has left the game"}, to=game_code)
-    print(f"{name} left game {game_code}")
+    # send({"name":name, "message": "has left the game"}, to=game_code)
+    # print(f"{name} left game {game_code}")
 
 ## SEND A MESSAGE TO ALL USERS
 @socketio.on("message")
@@ -251,7 +257,7 @@ def start_game(data):
     ## STEP GAME
     player = game.step_turn()
     comm_turn(player)
-    prompt_move(player)
+    # prompt_move(player)
 
 
     ## DEBUG STATEMENTS
@@ -287,23 +293,58 @@ def comm_turn(player:str):
     send(content, to=game_code)
     game.add_message(content)
 
+# ## PROMPT MOVE TO ACTIVE PLAYER
+# def prompt_move(player:str):
+#     ## PULL GAME CODE FROM SESSION DICT
+#     game_code = session.get("game_code")
+#     game = Game.lookup(game_code)
+#     if game is None: return
+    
+#     ## BUILD MESSAGE FROM ARGUMENTS
+#     content = {
+#         "name": session.get("name"),
+#     }
+#     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+#     send(content, to=game_code)
+#     game.add_message(content)
+
 ## PROMPT MOVE TO ACTIVE PLAYER
-def prompt_move(player:str):
+@socketio.on("submitMove")
+def submit_move(data):
     ## PULL GAME CODE FROM SESSION DICT
+    name = session.get("name")
     game_code = session.get("game_code")
     game = Game.lookup(game_code)
     if game is None: return
     
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nMESSAGE SESSION {session}\n")
+    
     ## BUILD MESSAGE FROM ARGUMENTS
     content = {
         "name": session.get("name"),
+        "message": f"{name} moved to the {data['room']}",
     }
+    ## MOVE PLAYER
+    game.board.move_player(name, data['room'])
     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
-    send(content, to=game_code)
     game.add_message(content)
+    send(content, to=game_code)
+
+    ## PROMPT SUGGESTION    
+    print(f"{session.get('name')} said {data['room']}")
 
 
 
+## LOOP
+## submitMove -> 
+## promptSuggestion -> 
+## submitSuggestion -> 
+## promptRebuttal -> 
+## submitRebuttal -> 
+## promptEndTurn -> 
+## submitEndTurn -> 
+## stepTurn -> 
 
 
 

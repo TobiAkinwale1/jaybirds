@@ -1,6 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
+<button type="button" name="start" id="send-btn" onClick="startGame()">Start Game</button>
+{% for rm in rooms %}
+    <button type="button" class="send-btn" name="move" id="{{ rm }}" onClick="submitMove('{{ rm }}')">{{ rm }}</button>
+{% endfor %}
+
+
+<div class="banner">
+    <h1>{{banner}}</h1>
+</div>
 <div class="flex-container">
+    <!-- SHOW NUM PLAYER OUT OF 4 -->
     <div class="game-box">
         <!-- game content -->
         <div class="message-box">
@@ -25,17 +35,28 @@
             <button class="board-cell {% if properties.type == 'room' %}room{% else %}hallway{% endif %}" style="grid-column: {{ properties.position[1] + 1 }}; grid-row: {{ properties.position[0] + 1 }};">
                 <div class="room-name">{{ room }}</div>
                 <div class="room-position">Position: {{ properties.position }}</div>
-                <div class="adjacent-rooms">Adjacent Rooms: {{ properties.adjacent_rooms }}</div>
+                <div class="adjacent-rooms">Occupants: {{ properties.occupants }}</div>
             </button>
         {% endfor %}
         </div>
     </div>
+    <div>
+        <!-- hand content -->
+        <h2>HAND:</h2>
+        <body>
+            {{ hand[0] }} </br>
+            {{ hand[1] }} </br>
+            {{ hand[2] }}
+        </body>
+    </div>
 </div>
 
-<script type="text/javascript">
+<script type="text/javascript" name={{name}}>
     var socketio = io();
 
     const messages = document.getElementById("messages")
+    const name = document.currentScript.getAttribute('name');
+    const banner = "Waiting for players to join";
 
     const createMessage = (name, msg) => {
         const content = `
@@ -51,16 +72,51 @@
         messages.innerHTML += content;
     }
 
+    // RECEIVE FUNCTIONS
     socketio.on("message", (data) => {
         createMessage(data.name, data.message);
     });
 
+    socketio.on("turn", (data) => {
+        banner = `${data.name}'S TURN'`;
+    });
+    
+    socketio.on("move", (data) => {
+        banner = `${data.name} MOVED TO ${data.room}'`;
+    });
+
+    socketio.on("suggestion", (data) => {
+        banner = `${data.name} MADE A SUGGESTION'`;
+    });
+    
+    socketio.on("accusation", (data) => {
+        banner = `${data.name} MADE AN ACCUSATION'`;
+    });
+    
+    socketio.on("prompt_move", (data) => {
+        if (name == data.name) { 
+            // show move buttons;
+
+        }
+    });
+
+    socketio.on("prompt_suggestion", (data) => {
+
+    });
+
+    // SEND FUNCTIONS
     const sendMessage = () => {
         const message = document.getElementById("message");
         if (message.value == "") return;
         socketio.emit("message", {data: message.value})
         message.value = "";
-        
+    };
+    const submitMove = (rm) => {
+        socketio.emit("submitMove", {room: rm})
+    };
+
+    const startGame = () => {
+        socketio.emit("startGame", {data: ""})
     };
 </script>
 

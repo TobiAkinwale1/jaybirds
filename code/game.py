@@ -16,12 +16,13 @@ class Game:
         Game.games[code] = self
 
         ## REFERENCES
-        # self.board = Board()
+        self.board = Board()
         self.deck = Deck()
 
         ## ATTRIBUTES
         self.code = code
         self.turn = None
+        self.messages = []
         self.players = {}
         self.messages = []
         self.solution = self.deck.draw(replace=False)
@@ -40,6 +41,7 @@ class Game:
 
     def add_player(self, name:str, char:str):
         hand = self.deck.draw(replace=False)
+        self.board.add_player(name, char)        
         self.players[name] = Player(
             player_name=name,
             character_name=char,
@@ -53,6 +55,10 @@ class Game:
         self.messages.append(message)
 
     def step_turn(self):
+        ## START GAME
+        if self._turn_idx == 0:
+            self.board = Board(self.players)
+        ## NEXT TURN
         self.turn = self.player_list[self._turn_idx % len(self.player_list)]
         self._turn_idx += 1
         return self.turn.player_name
@@ -63,6 +69,10 @@ class Game:
     def end_game(self, name):
         print(f"{name} solved the case!")
         print(f"They discovered that {self.solution[1]} commited the murder in the {self.solution[0]} with a {self.solution[2]}")
+    
+    @classmethod
+    def del_game(cls, code:str):
+        del cls.games[code]
 
     def get_available_characters(self):
         return self.available_characters
@@ -70,6 +80,17 @@ class Game:
     def remove_available_character(self, character):
         del self.available_characters[character]
 
+    # @classmethod
+    # def set_player(cls, code:str, name:str, char:str):
+    #     game = cls.lookup(code)
+    #     hand = game.deck.draw(replace=False)
+    #     game.players[name] =  Player(
+    #         playerName=name,
+    #         characterName=char,
+    #         hand=hand
+    #     )
+    #     game.taken_characters.append(char)
+    #     del game.available_characters[char]
 
     @classmethod
     def lookup(cls, code:str):
