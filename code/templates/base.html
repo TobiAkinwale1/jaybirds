@@ -9,11 +9,11 @@
         crossorigin="anonymous"
     ></script>
 </head>
-<body>
+<body class="content">
     <div class="content">
         <!-- <h1>Welcome to the Jaybirds test website home page!</h1> -->
         <!-- <p>This is a sample UI element.</p> -->
-        <a href="{{ url_for('home') }}"><button type="button" class="custom-button">Home</button></a>
+        <a href="{{ url_for('home') }}"><button type="button" class="nav-button">Home</button></a>
 
         {% block content %} {% endblock %}
     </div>

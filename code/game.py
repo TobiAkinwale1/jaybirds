@@ -29,7 +29,7 @@ class Game:
         self.available_characters = deepcopy(Board.CHARACTERS)
 
         ## Internal variables for stepping turn
-        self._player_list = None
+        self._player_list = []
         self._turn_idx = 0
 
     def get_board(self):
@@ -47,6 +47,7 @@ class Game:
             character_name=char,
             hand=hand
         )
+        self._player_list.append(self.players[name])
 
     def get_messages(self):
         return self.messages
@@ -57,7 +58,8 @@ class Game:
     def step_turn(self):
         ## START GAME
         if self._turn_idx == 0:
-            self.board = Board(self.players)
+            for player in self.players.values():
+                self.add_player(player.player_name, player.character_name)
         ## NEXT TURN
         self.turn = self.player_list[self._turn_idx % len(self.player_list)]
         self._turn_idx += 1

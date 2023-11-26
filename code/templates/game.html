@@ -1,20 +1,59 @@
 {% extends 'base.html' %}
 {% block content %}
-<button type="button" name="start" id="send-btn" onClick="startGame()">Start Game</button>
-{% for rm in rooms %}
-    <button type="button" class="send-btn" name="move" id="{{ rm }}" onClick="submitMove('{{ rm }}')">{{ rm }}</button>
-{% endfor %}
-
+<button type="button" class="nav-button" name="start" id="send-btn" onClick="startGame()">Start Game</button>
+<button type="button" class="nav-button" name="code" id="code">{{ game }}</button>
+<!-- {% for rm in adjacent_rooms %}
+    <button type="button" class="nav-button" name="move" id="{{ rm }}" onClick="submitMove('{{ rm }}')">{{ rm }}</button>
+{% endfor %} -->
 
 <div class="banner">
-    <h1>{{banner}}</h1>
+    <h1 id="banner">Waiting for Players...</h1>
 </div>
 <div class="flex-container">
-    <!-- SHOW NUM PLAYER OUT OF 4 -->
+    <!-- HAND AND PLAYERS -->
+    <div class="game-box">
+        <!-- game content -->
+        <div class="hand-box">
+            <!-- hand content -->
+            <h3>{{ player }}</h3>
+            <body>
+                {{ character }}
+            </body>
+            <h3>HAND:</h3>
+            <body>
+                {{ hand[0] }} </br>
+                {{ hand[1] }} </br>
+                {{ hand[2] }}
+            </body>
+            <!-- <div class="hand-box">
+                {% for card in hand %}
+                    <div class="card" name="card" id="{{ card }}">{{ card }}</button>
+                {% endfor %}
+            </div>             -->
+        </div>
+    </div>
+    <!-- GAME BOARD -->
+    <div class="board-box">
+        <!-- board content -->
+        <div>
+            <div class="board-grid">
+                {% for room, properties in board.items() %}
+                <button class="board-cell {% if properties.type == 'room' %}room{% else %}Hallway{% endif %}" \
+                    style="grid-column: {{ properties.position[1] + 1 }}; grid-row: {{ properties.position[0] + 1 }};" \
+                    id="{{ room }}-cell" >
+                    <div id="{{ room }}-name" class="room-name">{{ room+"\n" }}</div>
+                    <!-- <div class="room-position">Position: {{ properties.position }}</div> -->
+                    <div id="{{ room }}-adj" class="occupant-name">{{ " ".join(properties.occupants) }}</div>
+                </button>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    <!-- MESSAGING -->
     <div class="game-box">
         <!-- game content -->
         <div class="message-box">
-            <h2>GAME {{game}}: {{character}}</h2>
+            <h2>Messages</h2>
             <div class="messages" id="messages"></div>
             <div class="inputs">
                 <input
@@ -23,41 +62,117 @@
                     placeholder="Message"
                     name="message"
                     id="message"
+                    background-color: rgb(52, 73, 94)
                 />
                 <button type="button" name="send" id="send-btn" onClick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
-    <div class="board-box">
-        <!-- board content -->
-        <div class="board-grid">
-            {% for room, properties in board.items() %}
-            <button class="board-cell {% if properties.type == 'room' %}room{% else %}hallway{% endif %}" style="grid-column: {{ properties.position[1] + 1 }}; grid-row: {{ properties.position[0] + 1 }};">
-                <div class="room-name">{{ room }}</div>
-                <div class="room-position">Position: {{ properties.position }}</div>
-                <div class="adjacent-rooms">Occupants: {{ properties.occupants }}</div>
-            </button>
-        {% endfor %}
-        </div>
-    </div>
-    <div>
-        <!-- hand content -->
-        <h2>HAND:</h2>
-        <body>
-            {{ hand[0] }} </br>
-            {{ hand[1] }} </br>
-            {{ hand[2] }}
-        </body>
-    </div>
 </div>
+<h4>Game Code: {{ game }}</h4>
+
+<dialog id="dialog-move" class="dialog">
+    <!-- <button autofocus>Close</button> -->
+    <h2>Move Your Character!</h2>
+    {% for room in adjacent_rooms %}
+        <button type="button" class="blue-btn" name="send" id="{{ room }}" onClick="submitMove('{{ room }}')">{{ room }}</button>
+    {% endfor %}
+</dialog>
+
+<dialog id="dialog-suggest-char" class="dialog">
+    <!-- <button autofocus>Close</button> -->
+    <h2>Suggest a Character!</h2>
+    {% for key, value in characters.items() %}
+        <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="chooseCharacter('{{ value.name }}')">{{ value.name }}</button>
+    {% endfor %}
+</dialog>
+
+<dialog id="dialog-suggest-weapon" class="dialog">
+    <!-- <button autofocus>Close</button> -->
+    <h2>Suggest a Murder Weapon!</h2>
+    {% for weapon in weapons %}
+        <button type="button" class="red-btn" name="send" id="{{ weapon }}" onClick="chooseWeapon('{{ weapon }}')">{{ weapon }}</button>
+    {% endfor %}
+</dialog>
 
 <script type="text/javascript" name={{name}}>
     var socketio = io();
 
-    const messages = document.getElementById("messages")
+    const messages = document.getElementById("messages");
     const name = document.currentScript.getAttribute('name');
-    const banner = "Waiting for players to join";
+    const moveCharacter = document.getElementById("dialog-move");
+    const suggestCharacter = document.getElementById("dialog-suggest-char");
+    const suggestWeapon = document.getElementById("dialog-suggest-weapon");
+    
+    var characterSuggestion;
+    var weaponSuggestion;
+    var roomSuggestion;
 
+    // RECEIVE FUNCTIONS
+    socketio.on("message", (data) => {
+
+        // PARSE THE MESSAGE TYPE
+        console.log(data.type);
+        console.log(data.content);
+        if (data.type == "chat") {
+            createMessage(data.name, data.message);
+        }
+
+        // START RECEIVED BRANCH
+        else if (data.type == "start") {
+            document.getElementById("banner").innerHTML = `${data.message}`;
+            createMessage(data.name, "Started the game");
+            moveCharacter.showModal();
+        }
+
+        // MOVE RECEIVED BRANCH
+        else if (data.type == "move") {
+            createMessage(data.name, `moved to the ${data.new_room}`);
+            document.getElementById("banner").innerHTML = `${data.name} moved to the ${data.new_room}`;
+            // UPDATE OLD ROOM OCCUPANTS
+            var old_text = document.getElementById(`${data.old_room}-adj`).innerText
+            document.getElementById(`${data.old_room}-adj`).innerText = old_text.replace(data.name,'');;
+            
+            // UPDATE NEW ROOM OCCUPANTS
+            var new_text = document.getElementById(`${data.new_room}-adj`).innerText
+            document.getElementById(`${data.new_room}-adj`).innerText = new_text.concat(` ${data.name}`);;
+            
+            // TODO: Add character sprites to location boxes?
+            // banner.appendChild(document.createTextNode(`${data.name} MOVED TO ${data.room}'`));
+            
+            // PROMPT USER FOR SUGGESTION
+            console.log("{{player}}")
+            if (data.name == "{{player}}" && !data.new_room.includes("Hallway")) {
+                roomSuggestion = data.new_room;
+                createMessage(data.name, "is making a suggestion");
+                suggestCharacter.showModal();
+            }
+        }
+
+        // PROMPT MOVE
+        else if (data.type == "prompt_move") {
+            // HIGHLIGHT ADJACENT BOARD CELLS
+            // ENABLE BOARD BUTTONS TO SUBMIT A MOVE
+        }
+
+        // SUGGESTION RECEIVED BRANCH
+        else if (data.type == "suggest") {
+            document.getElementById("banner").innerHTML = `${data.player} suggested it was ${data.character} in the ${data.room} with a ${data.weapon}`;
+            // PROMPT REBUTTALS IN LOOP
+        }
+
+        // SUGGESTION RECEIVED BRANCH
+        else if (data.type == "rebut") {
+            document.getElementById("banner").innerHTML = `${data.name} REBUTTED ${data.character}`;
+        }
+
+        // ACCUSATION RECEIVED BRANCH
+        else if (data.type == "accuse") {
+            document.getElementById("banner").innerHTML = `${data.name} ACCUSED ${data.character}`;
+        }
+    });
+
+    // HELPER FUNCTIONS
     const createMessage = (name, msg) => {
         const content = `
         <div class="text">
@@ -65,59 +180,41 @@
                 <strong>${name}</strong>: ${msg}
             </span>
             <span class="muted">
-                ${new Date().toLocaleString()}
+                ${new Date().toLocaleTimeString('en-US')}
             </span>
         </div>
         `;
         messages.innerHTML += content;
     }
 
-    // RECEIVE FUNCTIONS
-    socketio.on("message", (data) => {
-        createMessage(data.name, data.message);
-    });
-
-    socketio.on("turn", (data) => {
-        banner = `${data.name}'S TURN'`;
-    });
-    
-    socketio.on("move", (data) => {
-        banner = `${data.name} MOVED TO ${data.room}'`;
-    });
-
-    socketio.on("suggestion", (data) => {
-        banner = `${data.name} MADE A SUGGESTION'`;
-    });
-    
-    socketio.on("accusation", (data) => {
-        banner = `${data.name} MADE AN ACCUSATION'`;
-    });
-    
-    socketio.on("prompt_move", (data) => {
-        if (name == data.name) { 
-            // show move buttons;
-
-        }
-    });
-
-    socketio.on("prompt_suggestion", (data) => {
-
-    });
-
-    // SEND FUNCTIONS
     const sendMessage = () => {
         const message = document.getElementById("message");
         if (message.value == "") return;
         socketio.emit("message", {data: message.value})
         message.value = "";
     };
-    const submitMove = (rm) => {
-        socketio.emit("submitMove", {room: rm})
+    const submitMove = (room) => {
+        moveCharacter.close();
+        socketio.emit("submitMove", {room: room})
     };
 
     const startGame = () => {
         socketio.emit("startGame", {data: ""})
     };
+
+    function chooseCharacter(char){
+        characterSuggestion = char;
+        suggestCharacter.close();
+        suggestWeapon.showModal();
+    }
+    
+    function chooseWeapon(weapon){
+        weaponSuggestion = weapon;
+        socketio.emit("submitSuggestion", {room: roomSuggestion, character: characterSuggestion, weapon: weaponSuggestion, player: "{{player}}"})
+        suggestWeapon.close();
+}
+
+
 </script>
 
 {% for msg in messages %}

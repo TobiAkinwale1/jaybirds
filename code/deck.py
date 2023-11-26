@@ -15,8 +15,9 @@ class Deck:
             "Revolver",
         ]
         
+        self.weapons = [weapon for weapon in Board.WEAPONS]
         self.characters = [char for char in Board.CHARACTERS]
-        self.rooms = [room for room in Board.ROOMS if "hallway" not in room]
+        self.rooms = [room for room in Board.ROOMS if "Hallway" not in room]
 
 
     def draw(self, replace=False):

@@ -1,12 +1,22 @@
 /* CSS styles for buttons */
-.custom-button {
-    background-color: rgb(18, 18, 18);
+.content{
+    background-color: rgb(28, 40, 51 );
+    border: 10px solid rgb(28, 40, 51 );
+    /* border-color: rgb(40, 55, 71); */
+}
+.nav-button {
+    background-color: rgb(40, 55, 71);
+    border: 3px solid rgb(40, 55, 71);
+    border-radius: 30px;;
     color: #ffffff;
-    border: white;
-    padding: 5px 10px;
+    font-weight : bold;
     cursor: pointer;
+    margin-bottom: 10px;  
 }
 .form {
+    background-color: rgb(28, 40, 51 );
+    border: 30px solid rgb(28, 40, 51 );
+    color: whitesmoke;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -27,7 +37,7 @@
     height: 2.5vw;
     align-items: center;
     justify-content: center;
-    background-color: rgb(70, 88, 244);
+    background-color: #E7483D;
     color: #eeeeee;       
     border: white;
     cursor: pointer;
@@ -42,7 +52,7 @@
     align-items: center;
     justify-content: center;    
     background-color: rgb(236, 236, 236);
-    color: rgb(70, 88, 244);    
+    color: #E7483D;    
     border: white;
     cursor: pointer;
     font-weight: bold;
@@ -50,28 +60,24 @@
 }
 
 .message-box {
-    border-color: black;
-    border-width: 2px;
-    border-style: solid;
+    background-color: rgb(40, 55, 71);
+    border: 30px solid rgb(40, 55, 71);
     border-radius: 10px;
-    background-color: whitesmoke;
-    height: 80vh;
+    color: whitesmoke;    
+    height: 70vh;
     display: flex;
     flex-direction: column;
-    width: 20vw;
+    width: 15vw;
     align-items: stretch;
 }
 .banner {
-    border-color: whitesmoke;
-    border-width: 2px;
-    border-style: solid;
+    border: 2px solid rgb(9, 124, 9);
     border-radius: 10px;
     background-color: rgb(9, 124, 9);
     color: whitesmoke;    
-    /* height: 80vh; */
+    text-align:center;
     display: flex;
     flex-direction: column;
-    /* width: 20vw; */
     align-items: stretch;
 }
 
@@ -79,15 +85,21 @@
     overflow-y: scroll;
     flex: 1;
     width: 100%;
+    font-size: 12px;
 }
 
 .inputs{
     padding: 10px;
     display: flex;
+
 }
 
 h2,h5 {
     text-align: center;
+}
+h4 {
+    text-align: right;
+    color: whitesmoke;
 }
 
 #message {
@@ -104,7 +116,7 @@ h2,h5 {
 }
 
 .muted { 
-    font-size: 10px;
+    font-size: 8px;
     color: darkgrey;
 }
 
@@ -112,11 +124,16 @@ h2,h5 {
     margin: auto;
 }
 
+.title {
+    color: #E7483D;
+}
+
 .character-box {
     height: 30vw;
     width: 80vw;
-    text-align:center;
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-left: auto;
     margin-right: auto;    
 }
@@ -125,14 +142,15 @@ h2,h5 {
     background-color: #E7483D;
     color: #74150E;
     font-family: "Times New Roman";    
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     font-variant: small-caps;
     cursor:pointer;
     border:none;
-    width:12vw;
-    height:24vw;
-    border-radius: 10px;    
+    width:9vw;
+    height:18vw;
+    border-radius: 10px;  
+    margin: 5px;  
 }
 .red-btn:hover {
     background-color: whitesmoke;
@@ -157,14 +175,15 @@ h2,h5 {
     background-color: #E7CC3D;
     color: #8E7A0C;
     font-family: "Times New Roman";
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     font-variant: small-caps;    
     cursor:pointer;
     border:none;
-    width:12vw;
-    height:24vw;    
+    width:9vw;
+    height:18vw;    
     border-radius: 10px;    
+    margin: 5px;  
 }
 .yellow-btn:hover {
     background-color: whitesmoke;
@@ -190,14 +209,15 @@ h2,h5 {
     background-color: #6CCA7B;
     color: #185622;
     font-family: "Times New Roman";    
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     font-variant: small-caps;    
     cursor:pointer;
     border:none;
-    width:12vw;
-    height:24vw;    
+    width:9vw;
+    height:18vw;    
     border-radius: 10px;    
+    margin: 5px;  
 }
 .green-btn:hover {
     background-color: whitesmoke;
@@ -222,14 +242,15 @@ h2,h5 {
     background-color: #D18EC3;
     color: #69365E;
     font-family: "Times New Roman";    
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     font-variant: small-caps;    
     cursor:pointer;
     border:none;
-    width:12vw;
-    height:24vw;    
+    width:9vw;
+    height:18vw;    
     border-radius: 10px;    
+    margin: 5px;  
 }
 .purple-btn:hover {
     background-color: whitesmoke;
@@ -254,14 +275,15 @@ h2,h5 {
     background-color: #ACEFEB;
     color: #56928E;
     font-family: "Times New Roman";   
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     font-variant: small-caps;     
     cursor:pointer;
     border:none;
-    width:12vw;
-    height:24vw;        
+    width:9vw;
+    height:18vw;        
     border-radius: 10px;    
+    margin: 5px;  
 }
 .blue-btn:hover {
     background-color: whitesmoke;
@@ -286,14 +308,15 @@ h2,h5 {
     background-color: #e0e0e0;
     color: white;
     font-family: "Times New Roman";    
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     font-variant: small-caps;    
     cursor:pointer;
     border:none;
-    width:12vw;
-    height:24vw;       
+    width:9vw;
+    height:18vw;       
     border-radius: 10px;    
+    margin: 5px;  
 }
 .white-btn:hover {
     background-color: whitesmoke;
@@ -320,46 +343,92 @@ h2,h5 {
     color: white;
     cursor:pointer;
     border:none;
-    /* width:12vw; */
-    /* height:24vw;        */
+    /* width:9vw; */
+    /* height:18vw;        */
 }
 
 .flex-container {
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .game-box {
-    flex: 1;
+    flex: 0;
     padding: 20px;
 }
 
 .board-box {
-    flex: 2;
-    padding: 20px;
+    height: 80vh;
+    width: 60vw;
+    flex: 0;
+    padding: 30px;
 }
 
 .board-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-gap: 10px;
+    grid-gap: 0px;
 }
 
 .board-cell {
-    border: 1px solid black;
+    font-family: "Times New Roman";    
     padding: 0;
-    width: 120px;
-    height: 120px;
+    width: 16vh;
+    height: 16vh;
 }
 
 .room {
-    background-color: rgb(40, 90, 155);
-    color: white;
+    background-color: rgb(164, 66, 57);
+    color: rgb(194, 118, 111);
+    border: 5px solid rgb(164, 66, 57);
 }
 
-.hallway {
-    background-color: rgb(175, 214, 243);
+.Hallway {
+    background-color: rgb(136, 76, 50);
+    color: rgb(167, 129, 113);
+    border: 10px solid rgb(164, 66, 57);
 }
 
 .room-name {
     font-weight: bold;
 }
+.occupant-name {
+    color: whitesmoke;
+    font-weight: bold;
+}
+
+.hand-box {
+    background-color: rgb(40, 55, 71);
+    border: 30px solid rgb(40, 55, 71);
+    border-radius: 10px;
+    color: white;
+    height: 70vh;
+    width: 15vw;
+    text-align:center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;    
+}
+
+.card {
+    background-color: rgb(43, 21, 12);
+    color: white;    
+    border: white;
+    height: 7vw;
+    width: 5vw;
+}
+
+.dialog[open] {
+    background-color: rgba(40, 55, 71, 0.9);
+    border: 5px solid whitesmoke;
+    border-radius: 30px;
+    color: whitesmoke;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+::backdrop {
+    background-color: rgba(50, 50, 50, 0.7);
+  }

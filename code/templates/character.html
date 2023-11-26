@@ -3,16 +3,13 @@
 
 <form method="post" class="form">
     <div>
-        <h2>Select a character!</h2>
+        <h2 class="title">Select a character!</h2>
         <h5>Player: {{name}}   |   Game Lobby: {{game}}</h5>
 
         <div class="character-box">
             {% for key, value in characters.items() %}
-                <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="choose('{{ value.name }}')">{{ value.name }}</button>
+                <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="sendCharacter('{{ value.name }}')">{{ value.name }}</button>
             {% endfor %}
-        </div>
-        <div class="character-box">
-            <button type="button" class="continue-btn" name="send" id="continue" onClick="sendCharacter()">Continue</button>
         </div>
     </div>
 </form>
@@ -20,13 +17,8 @@
 <script type="text/javascript">
     var socketio = io();
 
-    var character;
-    function choose(choice){
-        character = choice;
-    }
-
-    const sendCharacter = () => {
-        socketio.emit("select_character", {character: character})        
+    const sendCharacter = (choice) => {
+        socketio.emit("select_character", {character: choice})        
     };
 
     // Listen for the character_selected event
