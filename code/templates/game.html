@@ -83,7 +83,7 @@
     <!-- <button autofocus>Close</button> -->
     <h2>Suggest a Character!</h2>
     {% for key, value in characters.items() %}
-        <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="chooseCharacter('{{ value.name }}')">{{ value.name }}</button>
+        <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="suggestCharacter('{{ value.name }}')">{{ value.name }}</button>
     {% endfor %}
 </dialog>
 
@@ -91,7 +91,7 @@
     <!-- <button autofocus>Close</button> -->
     <h2>Suggest a Murder Weapon!</h2>
     {% for weapon in weapons %}
-        <button type="button" class="red-btn" name="send" id="{{ weapon }}" onClick="chooseWeapon('{{ weapon }}')">{{ weapon }}</button>
+        <button type="button" class="red-btn" name="send" id="{{ weapon }}" onClick="suggestWeapon('{{ weapon }}')">{{ weapon }}</button>
     {% endfor %}
 </dialog>
 
@@ -100,9 +100,9 @@
 
     const messages = document.getElementById("messages");
     const name = document.currentScript.getAttribute('name');
-    const moveCharacter = document.getElementById("dialog-move");
-    const suggestCharacter = document.getElementById("dialog-suggest-char");
-    const suggestWeapon = document.getElementById("dialog-suggest-weapon");
+    const dialogMove = document.getElementById("dialog-move");
+    const dialogCharacter = document.getElementById("dialog-suggest-char");
+    const dialogWeapon = document.getElementById("dialog-suggest-weapon");
     
     var characterSuggestion;
     var weaponSuggestion;
@@ -120,15 +120,15 @@
 
         // START RECEIVED BRANCH
         else if (data.type == "start") {
-            document.getElementById("banner").innerHTML = `${data.message}`;
-            createMessage(data.name, "Started the game");
-            moveCharacter.showModal();
+            document.getElementById("banner").innerHTML = data.message;
+            createMessage("Server", "Game started!");
+            dialogMove.showModal();
         }
 
         // MOVE RECEIVED BRANCH
         else if (data.type == "move") {
-            createMessage(data.name, `moved to the ${data.new_room}`);
-            document.getElementById("banner").innerHTML = `${data.name} moved to the ${data.new_room}`;
+            createMessage("Server", data.message);
+            document.getElementById("banner").innerHTML = data.message;
             // UPDATE OLD ROOM OCCUPANTS
             var old_text = document.getElementById(`${data.old_room}-adj`).innerText
             document.getElementById(`${data.old_room}-adj`).innerText = old_text.replace(data.name,'');;
@@ -141,11 +141,10 @@
             // banner.appendChild(document.createTextNode(`${data.name} MOVED TO ${data.room}'`));
             
             // PROMPT USER FOR SUGGESTION
-            console.log("{{player}}")
+            createMessage("Server", `${data.name} is making a suggestion`);
             if (data.name == "{{player}}" && !data.new_room.includes("Hallway")) {
                 roomSuggestion = data.new_room;
-                createMessage(data.name, "is making a suggestion");
-                suggestCharacter.showModal();
+                dialogCharacter.showModal();
             }
         }
 
@@ -194,7 +193,7 @@
         message.value = "";
     };
     const submitMove = (room) => {
-        moveCharacter.close();
+        dialogMove.close();
         socketio.emit("submitMove", {room: room})
     };
 
@@ -202,16 +201,16 @@
         socketio.emit("startGame", {data: ""})
     };
 
-    function chooseCharacter(char){
+    function suggestCharacter(char){
         characterSuggestion = char;
-        suggestCharacter.close();
-        suggestWeapon.showModal();
+        dialogCharacter.close();
+        dialogWeapon.showModal();
     }
     
-    function chooseWeapon(weapon){
+    function suggestWeapon(weapon){
         weaponSuggestion = weapon;
         socketio.emit("submitSuggestion", {room: roomSuggestion, character: characterSuggestion, weapon: weaponSuggestion, player: "{{player}}"})
-        suggestWeapon.close();
+        dialogWeapon.close();
 }
 
 

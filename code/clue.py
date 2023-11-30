@@ -250,14 +250,14 @@ def select_character(data):
 
     ## BUILD CHARACTER SELECTION MESSAGE
     content = {
-        "name": session.get("name"),
+        "name": "Server",
+        "type": "chat",
         "character": character,
-        "message": f"has chosen {character}"
+        "message": f"{name} chose {character}"
     }
     ## SEND CHARACTER SELECTION MESSAGE TO PLAYERS
     send(content, to=game_code)
     socketio.emit("character_selected", room=request.sid)
-
 
     ## SEND SPAWN MESSAGE
     room = game.board.get_location(name)
@@ -267,7 +267,7 @@ def select_character(data):
         "old_room": room,
         "new_room": room,
         "message": f"{name} joined in {room}",
-    }    
+    }
     ## SEND MOVE MESSAGE
     game.add_message(content)
     send(content, to=game_code)
@@ -294,15 +294,14 @@ def start_game(data):
 
     ## BUILD MESSAGE FROM ARGUMENTS
     content = {
-        "name": session.get("name"),
+        "name": "Server",
         "type": "start",
         "message": f"{player}'s Turn!",
     }
     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
     send(content, to=game_code)
-    # games[game_code]["messages"].append(content)
     game.add_message(content)
-    print(f"{name} said {data['data']}")
+    if debug: print(f"{name} said {data['data']}")
 
 
 ## SEND A TURN TO ALL USERS
@@ -339,7 +338,7 @@ def submit_move(data):
 
     ## BUILD MESSAGE FROM ARGUMENTS
     content = {
-        "name": session.get("name"),
+        "name": name,
         "type": "move",
         "old_room": old_room,
         "new_room": data['room'],
