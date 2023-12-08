@@ -3,16 +3,16 @@ class Player:
         self, 
         player_name:str, 
         character_name:str,
-        hand:tuple,
+        # hand:tuple,
     ):
         self.player_name = player_name  # Player's chosen name for the game
         self.character_name = character_name  # The character chosen to represent the player
-        self.hand = hand  # List of cards in player's hand
+        self.hand = []  # List of cards in player's hand
         self.game_code = None  # Code to join the game session
         self.is_done = False  # Indicates if the player made an incorrect accusation
 
-        assert len(hand) == 3
-
+    def set_hand(self, hand:tuple):
+        self.hand = hand
 
     def select_character(self, available_characters):
         """Allows the player to select a character from available options."""

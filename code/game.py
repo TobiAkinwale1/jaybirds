@@ -25,6 +25,7 @@ class Game:
         self.messages = []
         self.players = {}
         self.messages = []
+        self.rebuttals = []
         self.solution = self.deck.draw(replace=False)
         self.available_characters = deepcopy(Board.CHARACTERS)
 
@@ -40,12 +41,10 @@ class Game:
         return self.players[name]
 
     def add_player(self, name:str, char:str):
-        hand = self.deck.draw(replace=False)
-        self.board.add_player(name, char)        
+        self.board.add_character(char)        
         self.players[name] = Player(
             player_name=name,
             character_name=char,
-            hand=hand
         )
         self._player_list.append(self.players[name])
 
@@ -59,11 +58,23 @@ class Game:
         ## START GAME
         if self._turn_idx == 0:
             for player in self.players.values():
-                self.add_player(player.player_name, player.character_name)
+                hand = self.deck.deal(num_players=len(self.players))
+                player.set_hand(hand)
+                # self.add_player(player.player_name, player.character_name)
         ## NEXT TURN
         self.turn = self.player_list[self._turn_idx % len(self.player_list)]
         self._turn_idx += 1
+        self.reset_rebuttals()
         return self.turn.player_name
+
+    def step_rebuttals(self):
+        print(f"STEP REBUTTALS {self.rebuttals}")
+        return self.rebuttals.pop(0)
+
+    def reset_rebuttals(self):
+        self.rebuttals = list(self.players.keys())
+        self.rebuttals.remove(self.turn.player_name)
+        print(f"RESET REBUTTALS {self.rebuttals}")
 
     def check_solution(self, room:str, character:str, weapon:str):
         return (room, character, weapon) == self.solution

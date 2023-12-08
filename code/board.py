@@ -34,12 +34,12 @@ class Room:
     def get_occupied(self):
         return len(self.occupants)>0
         
-    def add_occupant(self, player:str):
-        self.occupants.add(player)
+    def add_occupant(self, character:str):
+        self.occupants.add(character)
       
-    def remove_occupant(self, player:str):
-        if player in self.occupants:
-            self.occupants.remove(player)
+    def remove_occupant(self, character:str):
+        if character in self.occupants:
+            self.occupants.remove(character)
 
 
 class Board:
@@ -215,7 +215,7 @@ class Board:
     def __init__(self) -> None:
 
         self.rooms = deepcopy(self.ROOMS)
-        self.player_locations = {}
+        self.character_locations = {}
         self.grid = np.array([
             [0, 0, 0, 0, 0],
             [0, 1, 0, 1, 0],
@@ -225,27 +225,27 @@ class Board:
         ])
 
 
-    def add_player(self, player:str, character:str):
+    def add_character(self, character:str):
         starting_room = self.CHARACTERS[character].starting_room
-        self.rooms[starting_room].occupants.append(player)
-        self.player_locations[player] = starting_room
+        self.rooms[starting_room].occupants.append(character)
+        self.character_locations[character] = starting_room
 
-    def get_location(self, player:str):
-        return self.player_locations[player]
+    def get_location(self, character:str):
+        return self.character_locations[character]
 
-    def move_player(self, player:str, room:str):
+    def move_character(self, character:str, room:str):
         ## MOVE PLAYER OUT OF OLD ROOM
-        old_room = self.player_locations[player]
-        self.rooms[old_room].occupants.remove(player)
+        old_room = self.character_locations[character]
+        self.rooms[old_room].occupants.remove(character)
         
         ## MOVE PLAYER INTO NEW ROOM
-        self.player_locations[player] = room
-        self.rooms[room].occupants.append(player)
+        self.character_locations[character] = room
+        self.rooms[room].occupants.append(character)
 
-    def get_adjacent_rooms(self, player):
+    def get_adjacent_rooms(self, character):
         ## GET ALL POSSIBLE ADJACENT ROOMS
         adjacent_rooms = []
-        current_room = self.get_location(player)
+        current_room = self.get_location(character)
         possible_rooms = self.rooms[current_room].adjacent_rooms
 
         ## ONLY ADD ROOMS AND UNOCCUPIED HALLWAYS

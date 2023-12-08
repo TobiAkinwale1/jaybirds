@@ -21,9 +21,9 @@
             </body>
             <h3>HAND:</h3>
             <body>
-                {{ hand[0] }} </br>
-                {{ hand[1] }} </br>
-                {{ hand[2] }}
+                {% for card in game_instance.get_player(player).hand %}
+                    {{ card }} </br>
+                {% endfor %}
             </body>
             <!-- <div class="hand-box">
                 {% for card in hand %}
@@ -42,8 +42,7 @@
                     style="grid-column: {{ properties.position[1] + 1 }}; grid-row: {{ properties.position[0] + 1 }};" \
                     id="{{ room }}-cell" >
                     <div id="{{ room }}-name" class="room-name">{{ room+"\n" }}</div>
-                    <!-- <div class="room-position">Position: {{ properties.position }}</div> -->
-                    <div id="{{ room }}-adj" class="occupant-name">{{ " ".join(properties.occupants) }}</div>
+                    <div id="{{ room }}-adj" class="occupant-name">{{ "\n".join(properties.occupants) }}</div>
                 </button>
             {% endfor %}
             </div>
@@ -72,7 +71,6 @@
 <h4>Game Code: {{ game }}</h4>
 
 <dialog id="dialog-move" class="dialog">
-    <!-- <button autofocus>Close</button> -->
     <h2>Move Your Character!</h2>
     {% for room in adjacent_rooms %}
         <button type="button" class="blue-btn" name="send" id="{{ room }}" onClick="submitMove('{{ room }}')">{{ room }}</button>
@@ -80,7 +78,6 @@
 </dialog>
 
 <dialog id="dialog-suggest-char" class="dialog">
-    <!-- <button autofocus>Close</button> -->
     <h2>Suggest a Character!</h2>
     {% for key, value in characters.items() %}
         <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="suggestCharacter('{{ value.name }}')">{{ value.name }}</button>
@@ -88,21 +85,29 @@
 </dialog>
 
 <dialog id="dialog-suggest-weapon" class="dialog">
-    <!-- <button autofocus>Close</button> -->
     <h2>Suggest a Murder Weapon!</h2>
     {% for weapon in weapons %}
         <button type="button" class="red-btn" name="send" id="{{ weapon }}" onClick="suggestWeapon('{{ weapon }}')">{{ weapon }}</button>
     {% endfor %}
 </dialog>
 
+<dialog id="dialog-rebuttal" class="dialog">
+    <h2>Make a rebuttal?</h2>
+    {% for card in game_instance.get_player(player).hand %}
+        <button type="button" class="blue-btn" name="send" id="{{ card }}" onClick="submitRebuttal('{{ card }}')">{{ card }}</button>
+    {% endfor %}
+    <button type="button" class="red-btn" name="send" id="none" onClick="submitRebuttal('{{ None }}')">No Rebuttal</button>
+</dialog>
+
 <script type="text/javascript" name={{name}}>
     var socketio = io();
 
     const messages = document.getElementById("messages");
-    const name = document.currentScript.getAttribute('name');
+    const name = document.currentScript.getAttribute("name");
     const dialogMove = document.getElementById("dialog-move");
     const dialogCharacter = document.getElementById("dialog-suggest-char");
     const dialogWeapon = document.getElementById("dialog-suggest-weapon");
+    const dialogRebuttal = document.getElementById("dialog-rebuttal");
     
     var characterSuggestion;
     var weaponSuggestion;
@@ -122,7 +127,9 @@
         else if (data.type == "start") {
             document.getElementById("banner").innerHTML = data.message;
             createMessage("Server", "Game started!");
-            dialogMove.showModal();
+            if (data.player == "{{player}}") {
+                dialogMove.showModal();
+            }
         }
 
         // MOVE RECEIVED BRANCH
@@ -131,20 +138,21 @@
             document.getElementById("banner").innerHTML = data.message;
             // UPDATE OLD ROOM OCCUPANTS
             var old_text = document.getElementById(`${data.old_room}-adj`).innerText
-            document.getElementById(`${data.old_room}-adj`).innerText = old_text.replace(data.name,'');;
+            document.getElementById(`${data.old_room}-adj`).innerText = old_text.replace(`${data.character}\n`,'');
+            document.getElementById(`${data.old_room}-adj`).innerText = old_text.replace(`${data.character}`,'');
             
             // UPDATE NEW ROOM OCCUPANTS
             var new_text = document.getElementById(`${data.new_room}-adj`).innerText
-            document.getElementById(`${data.new_room}-adj`).innerText = new_text.concat(` ${data.name}`);;
-            
-            // TODO: Add character sprites to location boxes?
-            // banner.appendChild(document.createTextNode(`${data.name} MOVED TO ${data.room}'`));
+            document.getElementById(`${data.new_room}-adj`).innerText = new_text.concat(`${data.character}\n`);
             
             // PROMPT USER FOR SUGGESTION
-            createMessage("Server", `${data.name} is making a suggestion`);
             if (data.name == "{{player}}" && !data.new_room.includes("Hallway")) {
+                createMessage("Server", `${data.name} is making a suggestion`);
                 roomSuggestion = data.new_room;
                 dialogCharacter.showModal();
+            }
+            else if (data.name == "{{player}}") {
+                stepTurn();
             }
         }
 
@@ -157,17 +165,23 @@
         // SUGGESTION RECEIVED BRANCH
         else if (data.type == "suggest") {
             document.getElementById("banner").innerHTML = `${data.player} suggested it was ${data.character} in the ${data.room} with a ${data.weapon}`;
-            // PROMPT REBUTTALS IN LOOP
+            if (data.name == "{{player}}") {
+                promptRebuttal();
+            }
         }
 
         // SUGGESTION RECEIVED BRANCH
-        else if (data.type == "rebut") {
-            document.getElementById("banner").innerHTML = `${data.name} REBUTTED ${data.character}`;
+        else if (data.type == "rebuttal") {
+            dialogRebuttal.showModal();
         }
 
         // ACCUSATION RECEIVED BRANCH
         else if (data.type == "accuse") {
             document.getElementById("banner").innerHTML = `${data.name} ACCUSED ${data.character}`;
+        }
+        // ACCUSATION RECEIVED BRANCH
+        else if (data.type == "banner") {
+            document.getElementById("banner").innerHTML = `${data.message}`;
         }
     });
 
@@ -189,12 +203,25 @@
     const sendMessage = () => {
         const message = document.getElementById("message");
         if (message.value == "") return;
-        socketio.emit("message", {data: message.value})
+        socketio.emit("message", {data: message.value});
         message.value = "";
     };
     const submitMove = (room) => {
         dialogMove.close();
-        socketio.emit("submitMove", {room: room})
+        socketio.emit("submitMove", {room: room});
+    };
+
+    const promptRebuttal = () => {
+        socketio.emit("promptRebuttal", {});
+    };
+
+    const submitRebuttal = (card) => {
+        dialogRebuttal.close();
+        socketio.emit("submitRebuttal", {card: card});
+    };
+
+    const stepTurn = () => {
+        socketio.emit("stepTurn", {data: ""})
     };
 
     const startGame = () => {
@@ -209,7 +236,7 @@
     
     function suggestWeapon(weapon){
         weaponSuggestion = weapon;
-        socketio.emit("submitSuggestion", {room: roomSuggestion, character: characterSuggestion, weapon: weaponSuggestion, player: "{{player}}"})
+        socketio.emit("submitSuggestion", {room: roomSuggestion, character: characterSuggestion, weapon: weaponSuggestion, player: "{{player}}"});
         dialogWeapon.close();
 }
 

@@ -26,6 +26,7 @@ app.secret_key = 'your_secret_key_here'
 ## VARIABLES
 users = json.load(open("credentials.json"))
 debug = True
+clients = {}
 
 ## GENERATE GAME CODES
 def generate_unique_code(length):
@@ -71,6 +72,7 @@ def home():
         if create != False:
             code = generate_unique_code(4)
             Game.create(code=code)
+            clients[code] = {}
         ## WARN USER TRYING TO JOIN A NON-EXISTANT GAME
         elif join != False and Game.lookup(code) is None:
             print("\nGAME DOES NOT EXIST\n")
@@ -108,7 +110,6 @@ def character():
 
     ## RENDER THE SELECTION PAGE
     return render_template("character.html", game=game_code, name=name, characters=game_instance.get_available_characters())
-    # return render_template("character.html", game=game_code, name=name, characters=games[game_code]["available_characters"], taken_characters=games[game_code]["taken_characters"])
 
 
 ## GAME BOARD PAGE
@@ -130,26 +131,22 @@ def game():
         print(f"\nSERVE GAME PAGE {name}\n")
         print(game_instance.players)
     
-    ## GET AVAILABLE MOVES
-    adjacent_rooms = game_instance.board.get_adjacent_rooms(name)
-
     ## RENDER THE GAME PAGE
     character = game_instance.get_player(name).character_name
+    adjacent_rooms = game_instance.board.get_adjacent_rooms(character)
     return render_template(
         "game.html", 
-        game=game_code, 
+        game=game_code,
+        game_instance=game_instance,
         player=name, 
         character=character, 
         messages=game_instance.get_messages(), 
         board=game_instance.board.rooms, 
-        hand=game_instance.players[name].hand, 
         adjacent_rooms=adjacent_rooms,
         characters=game_instance.board.CHARACTERS,
         weapons=game_instance.board.WEAPONS,
     )
 
-    # ## RENDER THE GAME PAGE
-    # return render_template("game.html", game=game_code, character=game_instance.players[name].playerName, messages=game_instance.messages, board=game_instance.board.ROOMS, hand=game_instance.players[name].hand)
 
 #########################
 ## MESSAGING FUNCTIONS ##
@@ -175,11 +172,7 @@ def connect(auth):
 
     ## ADD USER TO GAME AND SEND MESSAGE TO PLAYERS
     join_room(game_code)
-    # send({"name":name, "message": "has entered the game"}, to=game_code)
-    ## UPDATE GAME DICT WITH PLAYER INFO
-    # games[game_code]["num_players"] += 1
-    # games[game_code]["players"][name] = None
-    # print(f"{name} joined game {game_code}")
+    clients[game_code][name] = request.sid
 
 ## LEAVES A GAME ROOM
 @socketio.on("disconnect")
@@ -192,14 +185,6 @@ def disconnect():
     
     ## DEBUG STATEMENTS
     if debug: print(f"\nDISCONNECT SESSION {session}\n")
-
-    # ## REMOVE GAME IF ALL PLAYERS LEAVE
-    # if game_code in games and games[game_code]["num_players"] < 1:
-    #     del games[game_code]
-
-    # # SEND MESSAGE TO GAME LOBBY WHEN A USER LEAVES
-    # send({"name":name, "message": "has left the game"}, to=game_code)
-    # print(f"{name} left game {game_code}")
 
 
 ## SEND A MESSAGE TO ALL USERS
@@ -260,12 +245,13 @@ def select_character(data):
     socketio.emit("character_selected", room=request.sid)
 
     ## SEND SPAWN MESSAGE
-    room = game.board.get_location(name)
+    room = game.board.get_location(character)
     content = {
         "name": name,
         "type": "move",
         "old_room": room,
         "new_room": room,
+        "character": character,
         "message": f"{name} joined in {room}",
     }
     ## SEND MOVE MESSAGE
@@ -296,6 +282,7 @@ def start_game(data):
     content = {
         "name": "Server",
         "type": "start",
+        "player": player,
         "message": f"{player}'s Turn!",
     }
     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
@@ -330,16 +317,18 @@ def submit_move(data):
     if game is None: return
     
     ## DEBUG STATEMENTS
-    if debug: print(f"\nMESSAGE SESSION {session}\n")
+    if debug: print(f"\nsubmitMove MESSAGE SESSION {session}\n")
 
     ## MOVE PLAYER
-    old_room = game.board.get_location(name)
-    game.board.move_player(name, data['room'])
+    character = game.get_player(name).character_name
+    old_room = game.board.get_location(character)
+    game.board.move_character(character, data['room'])
 
     ## BUILD MESSAGE FROM ARGUMENTS
     content = {
         "name": name,
         "type": "move",
+        "character": character,
         "old_room": old_room,
         "new_room": data['room'],
         "message": f"{name} moved to the {data['room']}",
@@ -361,7 +350,7 @@ def submit_suggestion(data):
     if game is None: return
     
     ## DEBUG STATEMENTS
-    if debug: print(f"\nMESSAGE SESSION {session}\n")
+    if debug: print(f"\nsubmitSuggestion MESSAGE SESSION {session}\n")
 
     ## MOVE PLAYER
     player = data['player']
@@ -369,23 +358,25 @@ def submit_suggestion(data):
     character = data['character']
     weapon = data['weapon']
 
-    ## MOVE PLAYER WHOSE CHAR WAS SUGGESTED
-    suggested_player = [player.player_name for player in game.players.values() if player.character_name == character][0]
-    old_room = game.board.get_location(suggested_player)
-    game.board.move_player(suggested_player, room)
-    
-    ## SEND MOVE MESSAGE
-    content = {
-        "name": suggested_player,
-        "type": "move",
-        "old_room": old_room,
-        "new_room": room,
-        "message": f"{suggested_player} was moved to the {room}",
-    }    
-    ## SEND MOVE MESSAGE
-    game.add_message(content)
-    send(content, to=game_code)
-    if debug: print(content["message"])
+    character_active = [player.player_name for player in game.players.values() if player.character_name == character]
+    if character_active:
+        ## MOVE PLAYER WHOSE CHAR WAS SUGGESTED
+        old_room = game.board.get_location(character)
+        game.board.move_character(character, room)
+        
+        ## SEND MOVE MESSAGE
+        content = {
+            "name": character_active[0],
+            "type": "move",
+            "new_room": room,
+            "old_room": old_room,
+            "character": character,
+            "message": f"{character} was moved to the {room}",
+        }    
+        ## SEND MOVE MESSAGE
+        game.add_message(content)
+        send(content, to=game_code)
+        if debug: print(content["message"])
 
     ## SEND SUGGESTION MESSAGE
     content = {
@@ -395,13 +386,77 @@ def submit_suggestion(data):
         "room": room,
         "character": character,
         "weapon": weapon,
-        "message": f"{player} suggested it was {character} in the {room} with a {weapon}",
+        "message": f"{game.get_player(name).character_name} suggested it was {character} in the {room} with a {weapon}",
+        # "message": f"{player} suggested it was {character} in the {room} with a {weapon}",
     }
-
     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
     game.add_message(content)
     send(content, to=game_code)
     if debug: print(content["message"])
+
+
+## RECEIVE REBUTTAL PROMPT FROM CLIENT
+@socketio.on("promptRebuttal")
+def prompt_rebuttal(data):
+    ## PULL GAME CODE FROM SESSION DICT
+    name = session.get("name")
+    game_code = session.get("game_code")
+    game = Game.lookup(game_code)
+    if game is None: return
+    
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nprompt_rebuttal MESSAGE SESSION {session}\n")
+
+    ## SEND REBUTTAL MESSAGE
+    rebuttal_player = game.step_rebuttals()
+    content = {
+        "name": "Server",
+        "type": "message",
+        "message": f"{game.get_player(rebuttal_player).character_name} is considering a rebuttal...",
+    }
+    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    game.add_message(content)
+    send(content, to=game_code)
+    if debug: print(content["message"])
+
+    content = {
+        "name": "Server",
+        "player": name,
+        "type": "rebuttal",
+        "message": f"Submit rebuttal?",
+    }
+    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    game.add_message(content)
+    send(content, to=clients[game_code][rebuttal_player])
+    if debug: print(content["message"])
+
+
+## RECEIVE REBUTTAL SUB IT FROM CLIENT
+@socketio.on("submitRebuttal")
+def submit_rebuttal(data):
+    ## PULL GAME CODE FROM SESSION DICT
+    name = session.get("name")
+    game_code = session.get("game_code")
+    game = Game.lookup(game_code)
+    if game is None: return
+    
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nsubmitRebuttal MESSAGE SESSION {session}\n")
+
+    suggesting_player = game.turn.player_name
+    rebutting_player = name
+
+    card = data["card"]
+    print(f"{rebutting_player} SHOWED {suggesting_player} the card: {card}")
+
+    # ## INDICATE RESPONSE TO ENTIRE LOBBY
+    # send(content, to=game_code)
+
+
+    # ## SEND SPECIFIC CARD TO SUGGESTING PLAYER
+    # send(content, to=clients[game_code][suggesting_player])
+
+
 
 
 
