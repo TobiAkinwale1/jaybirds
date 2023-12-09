@@ -153,19 +153,23 @@
         if (data.type == "chat") {
             createMessage(data.name, data.message);
         }
-
         // PLAYER HAND BRANCH
         else if (data.type == "hand") {
             console.log(`msg branch hand: ${data.hand}`)
             createHand(data.hand);
         }
-
         // START TURN BRANCH
         else if (data.type == "start_turn") {
             banner.innerHTML = data.message;
             if (data.player == "{{player}}") {
                 updateAdjacentRooms(data.adjacent_rooms)
-                dialogMove.showModal();
+                if (data.adjacentRooms.length > 0) {
+                    dialogMove.showModal();
+                }
+                else {
+                    endText.innerHTML = "All moves are blocked. End Turn?";
+                    dialogEndTurn.showModal();                    
+                }
             }
         }
         // END TURN BRANCH
@@ -175,7 +179,6 @@
                 dialogEndTurn.showModal();
             }
         }
-
         // MOVE PLAYER BRANCH
         else if (data.type == "move") {
             createMessage("Server", data.message);
@@ -199,40 +202,28 @@
                 dialogCharacter.showModal();
             }
             else if (data.name == "{{player}}" && data.cause == "turn") {
-                endText.innerHTML = "All moves blocked. End Turn?";
+                endText.innerHTML = "Can't make a suggestion from the hallway. End Turn?";
                 dialogEndTurn.showModal();
             }
         }
-
-        // PROMPT MOVE
-        else if (data.type == "prompt_move") {
-            // HIGHLIGHT ADJACENT BOARD CELLS
-            // ENABLE BOARD BUTTONS TO SUBMIT A MOVE
-            // MAKE A MOVE OR ACCUSE?
-        }
-
         // SUGGESTION RECEIVED BRANCH
         else if (data.type == "suggest") {
             // document.getElementById("banner").innerHTML = `${data.player} suggested it was ${data.character} in the ${data.room} with a ${data.weapon}`;
             banner.innerHTML = `${data.message}`;
             suggestion.innerHTML = `${data.message}. Make a rebuttal?`; 
-
             if (data.name == "{{player}}") {
                 promptRebuttal();
             }
         }
-
         // SUGGESTION RECEIVED BRANCH
         else if (data.type == "prompt_rebuttal") {
             dialogSubmitRebuttal.showModal();
         }
-
         // REBUTTAL RECEIVED BRANCH
         else if (data.type == "acknowledge_rebuttal") {
             rebuttal.innerHTML = `${data.message}`; 
             dialogAcknowledgeRebuttal.showModal();
         }
-
         // ACCUSATION RECEIVED BRANCH
         else if (data.type == "accuse") {
             banner.innerHTML = `${data.name} ACCUSED ${data.character}`;
@@ -241,6 +232,12 @@
         else if (data.type == "banner") {
             banner.innerHTML = `${data.message}`;
         }
+        // PROMPT MOVE
+        else if (data.type == "prompt_move") {
+            // HIGHLIGHT ADJACENT BOARD CELLS
+            // ENABLE BOARD BUTTONS TO SUBMIT A MOVE
+            // MAKE A MOVE OR ACCUSE?
+        }        
     });
 
     // HELPER FUNCTIONS
@@ -331,13 +328,11 @@
     //     socketio.emit("promptRebuttal", {});
     // };
 
-
     // CHANGE PLAYER TURN
     const stepTurn = () => {
         console.log("stepTurn")
         socketio.emit("stepTurn", {data: ""})
     };
-
 
     function suggestCharacter(char){
         characterSuggestion = char;

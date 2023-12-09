@@ -60,7 +60,6 @@ class Game:
             for i,player in enumerate(self.players.values()):
                 hand = self.deck.deal(num_players=len(self.players)-i)
                 player.set_hand(hand)
-                # self.add_player(player.player_name, player.character_name)
         ## NEXT TURN
         self.turn = self.player_list[self._turn_idx % len(self.player_list)]
         self._turn_idx += 1
@@ -92,18 +91,6 @@ class Game:
 
     def remove_available_character(self, character):
         del self.available_characters[character]
-
-    # @classmethod
-    # def set_player(cls, code:str, name:str, char:str):
-    #     game = cls.lookup(code)
-    #     hand = game.deck.draw(replace=False)
-    #     game.players[name] =  Player(
-    #         playerName=name,
-    #         characterName=char,
-    #         hand=hand
-    #     )
-    #     game.taken_characters.append(char)
-    #     del game.available_characters[char]
 
     @classmethod
     def lookup(cls, code:str):

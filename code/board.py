@@ -231,7 +231,7 @@ class Board:
         self.character_locations[character] = starting_room
 
     def get_location(self, character:str):
-        return self.character_locations[character]
+        return self.character_locations.get(character, None)
 
     def move_character(self, character:str, room:str):
         ## MOVE PLAYER OUT OF OLD ROOM

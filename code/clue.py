@@ -384,27 +384,28 @@ def submit_suggestion(data):
     room = data['room']
     character = data['character']
     weapon = data['weapon']
-
-    player_moved = [player.player_name for player in game.players.values() if player.character_name == character]
-    if player_moved:
-        ## MOVE PLAYER WHOSE CHAR WAS SUGGESTED
-        old_room = game.board.get_location(character)
-        game.board.move_character(character, room)
-        
-        ## SEND MOVE MESSAGE
-        content = {
-            "name": player_moved[0],
-            "type": "move",
-            "cause": "suggestion",
-            "new_room": room,
-            "old_room": old_room,
-            "character": character,
-            "message": f"{character} was moved to the {room}",
-        }    
-        ## SEND MOVE MESSAGE
-        game.add_message(content)
-        send(content, to=game_code)
-        if debug: print(content["message"])
+    
+    ## MOVE PLAYER WHOSE CHAR WAS SUGGESTED
+    if character not in game.board.character_locations:
+        game.board.add_character(character)
+    old_room = game.board.get_location(character)
+    game.board.move_character(character, room)
+    # player_moved = [player.player_name for player in game.players.values() if player.character_name == character]
+    
+    ## SEND MOVE MESSAGE
+    content = {
+        "name": name,
+        "type": "move",
+        "cause": "suggestion",
+        "new_room": room,
+        "old_room": old_room,
+        "character": character,
+        "message": f"{character} was moved to the {room}",
+    }    
+    ## SEND MOVE MESSAGE
+    game.add_message(content)
+    send(content, to=game_code)
+    if debug: print(content["message"])
 
     ## SEND SUGGESTION MESSAGE
     content = {
