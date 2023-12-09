@@ -338,14 +338,93 @@ h4 {
     border-radius: 10px;    
 }
 
+.close-btn {
+    background-color: #E7483D;
+    color: #74150E;
+    font-family: "Times New Roman";    
+    font-size: 20px;
+    font-weight: bold;
+    font-variant: small-caps;
+    cursor:pointer;
+    border:none;
+    width:9vw;
+    height:4vw;
+    border-radius: 10px;  
+    margin: 5px;  
+}
+.close-btn:hover {
+    background-color: whitesmoke;
+}
+.close-btn:focus {
+    background-color: whitesmoke;
+    border-color: #74150E;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
 .continue-btn {
+    background-color: #6CCA7B;
+    color: #185622;
+    font-family: "Times New Roman";    
+    font-size: 20px;
+    font-weight: bold;
+    font-variant: small-caps;    
+    cursor:pointer;
+    border:none;
+    width:9vw;
+    height:4vw;    
+    border-radius: 10px;    
+    margin: 5px;  
+}
+.continue-btn:hover {
+    background-color: whitesmoke;
+}
+.continue-btn:focus {
+    background-color: whitesmoke;
+    border-color: #185622;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
+.card-btn {
+    background-color: rgb(251, 236, 192);
+    color: rgb(33, 32, 32);
+    /* background-color: rgb(129, 79, 58); */
+    /* color: rgb(80, 41, 27); */
+    font-family: "Times New Roman";    
+    font-size: 20px;
+    font-weight: bold;
+    font-variant: small-caps;    
+    cursor:pointer;
+    border:none;
+    width:9vw;
+    height:4vw;    
+    border-radius: 10px;    
+    margin: 5px;  
+}
+.card-btn:hover {
+    background-color: rgb(84, 80, 67);
+    color: rgb(251, 236, 192);
+    border-color: rgb(33, 32, 32);
+}
+.card-btn:focus {
+    background-color: rgb(84, 80, 67);
+    color: rgb(33, 32, 32);
+    border-color: rgb(33, 32, 32);
+    /* border-color: rgb(95, 52, 37); */
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;    
+}
+
+/* .continue-btn {
     background-color: rgb(13, 129, 9);
     color: white;
     cursor:pointer;
     border:none;
-    /* width:9vw; */
-    /* height:18vw;        */
-}
+} */
 
 .flex-container {
     display: flex;
@@ -425,6 +504,14 @@ h4 {
     border-radius: 30px;
     color: whitesmoke;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;    
+}
+
+.card-box {
+    display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
 }

@@ -57,8 +57,8 @@ class Game:
     def step_turn(self):
         ## START GAME
         if self._turn_idx == 0:
-            for player in self.players.values():
-                hand = self.deck.deal(num_players=len(self.players))
+            for i,player in enumerate(self.players.values()):
+                hand = self.deck.deal(num_players=len(self.players)-i)
                 player.set_hand(hand)
                 # self.add_player(player.player_name, player.character_name)
         ## NEXT TURN

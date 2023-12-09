@@ -3,6 +3,7 @@ class Player:
         self, 
         player_name:str, 
         character_name:str,
+        active:bool=False,
         # hand:tuple,
     ):
         self.player_name = player_name  # Player's chosen name for the game
@@ -57,4 +58,5 @@ class Player:
         self.hand.extend(initial_cards)
         print(f"{self.player_name} is starting at {self.position} with cards: {self.hand}.")
 
-
+    def __str__(self) -> str:
+        return f"Player<{self.player_name}>"

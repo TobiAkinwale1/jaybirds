@@ -1,3 +1,4 @@
+import math
 import random
 
 from board import Board
@@ -11,7 +12,6 @@ class Deck:
         self.rooms = [room for room in Board.ROOMS if "Hallway" not in room]
         self.cards = self.weapons + self.characters + self.rooms
         random.shuffle(self.cards)
-        self.total_cards = len(self.cards) - 3
 
     def draw(self, replace=False):
         print(self.characters)
@@ -30,7 +30,7 @@ class Deck:
         return room, character, weapon
 
     def deal(self, num_players):
-        num_cards = max(self.total_cards//num_players, len(self.cards))
+        num_cards = math.ceil(len(self.cards)/num_players)
         hand = tuple(self.cards[:num_cards])
         self.cards = self.cards[num_cards:]
         return hand
@@ -40,6 +40,8 @@ if __name__ == "__main__":
 
     deck = Deck()
     r,c,w = deck.draw()
+
+    deck.deal(4)
 
     assert len(deck.characters) == 5
     assert len(deck.weapons) == 5

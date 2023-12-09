@@ -8,6 +8,8 @@
 
 <div class="banner">
     <h1 id="banner">Waiting for Players...</h1>
+
+
 </div>
 <div class="flex-container">
     <!-- HAND AND PLAYERS -->
@@ -20,11 +22,12 @@
                 {{ character }}
             </body>
             <h3>HAND:</h3>
-            <body>
+            <!-- <div class="hand" id="hand"></div> -->
+            <!-- <body>
                 {% for card in game_instance.get_player(player).hand %}
                     {{ card }} </br>
                 {% endfor %}
-            </body>
+            </body> -->
             <!-- <div class="hand-box">
                 {% for card in hand %}
                     <div class="card" name="card" id="{{ card }}">{{ card }}</button>
@@ -72,42 +75,69 @@
 
 <dialog id="dialog-move" class="dialog">
     <h2>Move Your Character!</h2>
-    {% for room in adjacent_rooms %}
-        <button type="button" class="blue-btn" name="send" id="{{ room }}" onClick="submitMove('{{ room }}')">{{ room }}</button>
-    {% endfor %}
+    <div class="card-box" id="adjacent-rooms">
+    </div>
 </dialog>
 
 <dialog id="dialog-suggest-char" class="dialog">
     <h2>Suggest a Character!</h2>
+    <div class="card-box">
     {% for key, value in characters.items() %}
         <button type="button" class="{{ value.color }}-btn" name="send" id="{{ value.name }}" onClick="suggestCharacter('{{ value.name }}')">{{ value.name }}</button>
     {% endfor %}
+    </div>
 </dialog>
 
 <dialog id="dialog-suggest-weapon" class="dialog">
     <h2>Suggest a Murder Weapon!</h2>
+    <div class="card-box">
     {% for weapon in weapons %}
         <button type="button" class="red-btn" name="send" id="{{ weapon }}" onClick="suggestWeapon('{{ weapon }}')">{{ weapon }}</button>
     {% endfor %}
+    </div>
 </dialog>
 
-<dialog id="dialog-rebuttal" class="dialog">
-    <h2>Make a rebuttal?</h2>
-    {% for card in game_instance.get_player(player).hand %}
-        <button type="button" class="blue-btn" name="send" id="{{ card }}" onClick="submitRebuttal('{{ card }}')">{{ card }}</button>
-    {% endfor %}
-    <button type="button" class="red-btn" name="send" id="none" onClick="submitRebuttal('{{ None }}')">No Rebuttal</button>
+<dialog id="dialog-submit-rebuttal" class="dialog">
+    <h2 id="suggestion"></h2>
+    <div class="card-box" id="hand"></div>
+    <button type="button" class="close-btn" name="send" id="noRebuttal" onClick="submitRebuttal('{{ None }}')">No Rebuttal</button>
 </dialog>
+
+<dialog id="dialog-acknowledge-rebuttal" class="dialog">
+    <h2 id="rebuttal"></h2>
+    <button type="button" class="continue-btn" name="send" id="acknowledgeRebuttal" onClick="promptRebuttal()">Continue</button>
+</dialog>
+
+<dialog id="dialog-end-turn" class="dialog">
+    <h2>Rebuttals complete. End Turn?</h2>
+    <button type="button" class="continue-btn" name="send" id="end-turn" onClick="endTurn()">End Turn</button>
+    <button type="button" class="close-btn" name="send" id="make-accusation" onClick="promptAccusation()">Make Accusation</button>
+</dialog>
+
+<dialog id="dialog-accusation" class="dialog">
+    <h2 id="rebuttal"></h2>
+    <button type="button" class="continue-btn" name="send" id="end-turn" onClick="endTurn()">End Turn</button>
+    <button type="button" class="close-btn" name="send" id="make-accusation" onClick="promptAccusation()">Make Accusation</button>
+</dialog>
+
 
 <script type="text/javascript" name={{name}}>
     var socketio = io();
 
+    const hand = document.getElementById("hand");
+    const banner = document.getElementById("banner");
     const messages = document.getElementById("messages");
+    const rebuttal = document.getElementById("rebuttal");
+    const suggestion = document.getElementById("suggestion");
+    const adjacentRooms = document.getElementById("adjacent-rooms");
     const name = document.currentScript.getAttribute("name");
     const dialogMove = document.getElementById("dialog-move");
     const dialogCharacter = document.getElementById("dialog-suggest-char");
     const dialogWeapon = document.getElementById("dialog-suggest-weapon");
-    const dialogRebuttal = document.getElementById("dialog-rebuttal");
+    const dialogSubmitRebuttal = document.getElementById("dialog-submit-rebuttal");
+    const dialogAcknowledgeRebuttal = document.getElementById("dialog-acknowledge-rebuttal");
+    const dialogEndTurn = document.getElementById("dialog-end-turn");
+    const dialogAccusation = document.getElementById("dialog-accusation");
     
     var characterSuggestion;
     var weaponSuggestion;
@@ -118,24 +148,36 @@
 
         // PARSE THE MESSAGE TYPE
         console.log(data.type);
-        console.log(data.content);
+        // console.log(data.content);
         if (data.type == "chat") {
             createMessage(data.name, data.message);
         }
 
-        // START RECEIVED BRANCH
-        else if (data.type == "start") {
-            document.getElementById("banner").innerHTML = data.message;
-            createMessage("Server", "Game started!");
+        // PLAYER HAND BRANCH
+        else if (data.type == "hand") {
+            console.log(`msg branch hand: ${data.hand}`)
+            createHand(data.hand);
+        }
+
+        // START TURN BRANCH
+        else if (data.type == "start_turn") {
+            banner.innerHTML = data.message;
             if (data.player == "{{player}}") {
+                updateAdjacentRooms(data.adjacent_rooms)
                 dialogMove.showModal();
             }
         }
+        // END TURN BRANCH
+        else if (data.type == "end_turn") {
+            if (data.player == "{{player}}") {
+                dialogEndTurn.showModal();
+            }
+        }
 
-        // MOVE RECEIVED BRANCH
+        // MOVE PLAYER BRANCH
         else if (data.type == "move") {
             createMessage("Server", data.message);
-            document.getElementById("banner").innerHTML = data.message;
+            banner.innerHTML = data.message;
             // UPDATE OLD ROOM OCCUPANTS
             var old_text = document.getElementById(`${data.old_room}-adj`).innerText
             document.getElementById(`${data.old_room}-adj`).innerText = old_text.replace(`${data.character}\n`,'');
@@ -160,28 +202,38 @@
         else if (data.type == "prompt_move") {
             // HIGHLIGHT ADJACENT BOARD CELLS
             // ENABLE BOARD BUTTONS TO SUBMIT A MOVE
+            // MAKE A MOVE OR ACCUSE?
         }
 
         // SUGGESTION RECEIVED BRANCH
         else if (data.type == "suggest") {
-            document.getElementById("banner").innerHTML = `${data.player} suggested it was ${data.character} in the ${data.room} with a ${data.weapon}`;
+            // document.getElementById("banner").innerHTML = `${data.player} suggested it was ${data.character} in the ${data.room} with a ${data.weapon}`;
+            banner.innerHTML = `${data.message}`;
+            suggestion.innerHTML = `${data.message}. Make a rebuttal?`; 
+
             if (data.name == "{{player}}") {
                 promptRebuttal();
             }
         }
 
         // SUGGESTION RECEIVED BRANCH
-        else if (data.type == "rebuttal") {
-            dialogRebuttal.showModal();
+        else if (data.type == "prompt_rebuttal") {
+            dialogSubmitRebuttal.showModal();
+        }
+
+        // REBUTTAL RECEIVED BRANCH
+        else if (data.type == "acknowledge_rebuttal") {
+            rebuttal.innerHTML = `${data.message}`; 
+            dialogAcknowledgeRebuttal.showModal();
         }
 
         // ACCUSATION RECEIVED BRANCH
         else if (data.type == "accuse") {
-            document.getElementById("banner").innerHTML = `${data.name} ACCUSED ${data.character}`;
+            banner.innerHTML = `${data.name} ACCUSED ${data.character}`;
         }
         // ACCUSATION RECEIVED BRANCH
         else if (data.type == "banner") {
-            document.getElementById("banner").innerHTML = `${data.message}`;
+            banner.innerHTML = `${data.message}`;
         }
     });
 
@@ -200,33 +252,86 @@
         messages.innerHTML += content;
     }
 
+    // HELPER FUNCTIONS
+
+    // POPULATE CARDS IN THE PLAYER'S HAND
+    const createHand = (cards) => {
+        hand.innerHTML = "";
+        for (i in cards) {
+            const content = `<button type="button" class="card-btn" name="send" id="${cards[i]}" onClick="submitRebuttal('${cards[i]}')">${cards[i]}</button>`;
+            hand.innerHTML += content;
+        }
+    }
+    // POPULATE ROOM OPTIONS IN MOVE DIALOGUE
+    const updateAdjacentRooms = (rooms) => {
+        adjacentRooms.innerHTML = "";
+        for (i in rooms) {
+            const content = `<button type="button" class="card-btn" name="send" id="${rooms[i]}" onClick="submitMove('${rooms[i]}')">${rooms[i]}</button>`;
+            adjacentRooms.innerHTML += content;
+        }
+    }
+    // SEND MESSAGE TO OTHER PLAYERS
     const sendMessage = () => {
         const message = document.getElementById("message");
         if (message.value == "") return;
         socketio.emit("message", {data: message.value});
         message.value = "";
     };
+
+    // START THE GAME LOOP
+    const startGame = () => {
+        console.log("startGame")
+        socketio.emit("startGame", {data: ""})
+    };
+    // SUBMIT MOVE TO CURRENT PLAYER
     const submitMove = (room) => {
         dialogMove.close();
+        console.log("submitMove")
         socketio.emit("submitMove", {room: room});
     };
-
+    // PROMPT NEXT PLAYER FOR REBUTTAL
     const promptRebuttal = () => {
+        dialogAcknowledgeRebuttal.close();
+        console.log("promptRebuttal")
         socketio.emit("promptRebuttal", {});
     };
-
+    // PROMPT NEXT PLAYER'S REBUTTAL TO CURRENT PLAYER
     const submitRebuttal = (card) => {
-        dialogRebuttal.close();
+        dialogSubmitRebuttal.close();
+        console.log("submitRebuttal")
         socketio.emit("submitRebuttal", {card: card});
     };
+    // PROMPT NEXT PLAYER'S REBUTTAL TO CURRENT PLAYER
+    const promptAccusation = () => {
+        dialogEndTurn.close();
+        console.log("promptAccusation")
+        dialogAccusation.showModal();
+    };
+    // PROMPT NEXT PLAYER'S REBUTTAL TO CURRENT PLAYER
+    const submitAccusation = () => {
+        dialogAccusation.close();
+        console.log("submitAccusation")
+        socketio.emit("submitAccusation", {});
+    };
+    // PROMPT NEXT PLAYER'S REBUTTAL TO CURRENT PLAYER
+    const endTurn = () => {
+        dialogEndTurn.close();
+        console.log("endTurn")
+        socketio.emit("endTurn", {});
+    };
+    // // CURRENT PLAYER ACKNOWLEDGES AND REQUESTS NEXT REBUTTAL
+    // const acknowledgeRebuttal = (card) => {
+    //     dialogAcknowledgeRebuttal.close();
+    //     socketio.emit("promptRebuttal", {});
+    // };
 
+
+    // CHANGE PLAYER TURN
     const stepTurn = () => {
+        console.log("stepTurn")
         socketio.emit("stepTurn", {data: ""})
     };
 
-    const startGame = () => {
-        socketio.emit("startGame", {data: ""})
-    };
 
     function suggestCharacter(char){
         characterSuggestion = char;

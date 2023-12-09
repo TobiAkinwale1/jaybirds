@@ -14,6 +14,7 @@ os.chdir(current_dir)
 
 from board import Board
 from game import Game
+from helpers import get_session_data
 
 
 ## FLASK SETUP
@@ -275,20 +276,46 @@ def start_game(data):
     ## DEBUG STATEMENTS
     if debug: 
         print(f"\nSTART SESSION {session}\n")
-        print(f"\nCHARACTER SELECTED {name}\n")
         print(game.turn)
 
-    ## BUILD MESSAGE FROM ARGUMENTS
+    ## SEND HANDS TO EACH PLAYER
+    for player_name, player_obj in game.players.items():
+        content = {
+            "name": "Server",
+            "type": "hand",
+            "hand": player_obj.hand,
+            "player": player_name,
+            "message": f"hand: {player_obj.hand}",
+        }
+        ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+        send(content, to=clients[game_code][player_name])
+        game.add_message(content)
+        if debug: print(f"{player_name}'s {content['message']}")        
+
+    ## GAME START MESSAGE
     content = {
         "name": "Server",
-        "type": "start",
+        "type": "chat",
+        "message": f"Game started!",
+    }
+    send(content, to=game_code)
+    game.add_message(content)
+    if debug: print(f"{content['message']}")
+
+    ## BUILD MESSAGE FROM ARGUMENTS
+    character = game.get_player(player).character_name
+    adjacent_rooms = game.board.get_adjacent_rooms(character)
+    content = {
+        "name": "Server",
+        "type": "start_turn",
         "player": player,
+        "adjacent_rooms": adjacent_rooms,
         "message": f"{player}'s Turn!",
     }
     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
     send(content, to=game_code)
     game.add_message(content)
-    if debug: print(f"{name} said {data['data']}")
+    if debug: print(f"{content['message']}")
 
 
 ## SEND A TURN TO ALL USERS
@@ -314,7 +341,6 @@ def submit_move(data):
     name = session.get("name")
     game_code = session.get("game_code")
     game = Game.lookup(game_code)
-    if game is None: return
     
     ## DEBUG STATEMENTS
     if debug: print(f"\nsubmitMove MESSAGE SESSION {session}\n")
@@ -347,7 +373,6 @@ def submit_suggestion(data):
     name = session.get("name")
     game_code = session.get("game_code")
     game = Game.lookup(game_code)
-    if game is None: return
     
     ## DEBUG STATEMENTS
     if debug: print(f"\nsubmitSuggestion MESSAGE SESSION {session}\n")
@@ -408,27 +433,65 @@ def prompt_rebuttal(data):
     if debug: print(f"\nprompt_rebuttal MESSAGE SESSION {session}\n")
 
     ## SEND REBUTTAL MESSAGE
-    rebuttal_player = game.step_rebuttals()
-    content = {
-        "name": "Server",
-        "type": "message",
-        "message": f"{game.get_player(rebuttal_player).character_name} is considering a rebuttal...",
-    }
-    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
-    game.add_message(content)
-    send(content, to=game_code)
-    if debug: print(content["message"])
+    if game.rebuttals:
+        rebuttal_player = game.step_rebuttals()
+        content = {
+            "name": "Server",
+            "type": "message",
+            "message": f"{game.get_player(rebuttal_player).character_name} is considering a rebuttal...",
+        }
+        ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+        game.add_message(content)
+        send(content, to=game_code)
+        if debug: print(content["message"])
 
+        content = {
+            "name": "Server",
+            "player": name,
+            "type": "prompt_rebuttal",
+            "message": f"Submit rebuttal?",
+        }
+        ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+        game.add_message(content)
+        send(content, to=clients[game_code][rebuttal_player])
+        if debug: print(content["message"])
+
+    ## IF REBUTTALS ARE FINISHED, STEP THE TURN
+    else:
+        content = {
+            "name": name,
+            "player": name,
+            "type": "end_turn",
+            "message": f"Rebuttals finished. End turn?",
+        }
+        ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+        game.add_message(content)
+        send(content, to=clients[game_code][name])
+        if debug: print(content["message"])
+
+
+## RECEIVE REBUTTAL PROMPT FROM CLIENT
+@socketio.on("endTurn")
+def end_turn(data):
+    ## PULL GAME CODE FROM SESSION DICT
+    name = session.get("name")
+    game_code = session.get("game_code")
+    game = Game.lookup(game_code)
+
+    player = game.step_turn()
+    character = game.get_player(player).character_name
+    adjacent_rooms = game.board.get_adjacent_rooms(character)
     content = {
         "name": "Server",
-        "player": name,
-        "type": "rebuttal",
-        "message": f"Submit rebuttal?",
+        "type": "start_turn",
+        "player": player,
+        "adjacent_rooms": adjacent_rooms,
+        "message": f"{player}'s Turn!",
     }
     ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    send(content, to=game_code)
     game.add_message(content)
-    send(content, to=clients[game_code][rebuttal_player])
-    if debug: print(content["message"])
+    if debug: print(f"{content['message']}")
 
 
 ## RECEIVE REBUTTAL SUB IT FROM CLIENT
@@ -438,24 +501,36 @@ def submit_rebuttal(data):
     name = session.get("name")
     game_code = session.get("game_code")
     game = Game.lookup(game_code)
-    if game is None: return
     
     ## DEBUG STATEMENTS
     if debug: print(f"\nsubmitRebuttal MESSAGE SESSION {session}\n")
 
     suggesting_player = game.turn.player_name
     rebutting_player = name
+    rebutting_character = game.get_player(rebutting_player).character_name
 
-    card = data["card"]
-    print(f"{rebutting_player} SHOWED {suggesting_player} the card: {card}")
+    ## INDICATE RESPONSE TO ENTIRE LOBBY
+    content = {
+        "name": "Server",
+        "type": "chat",
+        "message": f"{rebutting_player} showed {suggesting_player} a card",
+    }
+    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    game.add_message(content)
+    send(content, to=game_code)
+    if debug: print(content["message"])
 
-    # ## INDICATE RESPONSE TO ENTIRE LOBBY
-    # send(content, to=game_code)
-
-
-    # ## SEND SPECIFIC CARD TO SUGGESTING PLAYER
-    # send(content, to=clients[game_code][suggesting_player])
-
+    ## SEND SPECIFIC CARD TO SUGGESTING PLAYER
+    content = {
+        "name": "Server",
+        "player": name,
+        "type": "acknowledge_rebuttal",
+        "message": f"{rebutting_character} showed you: {data['card']}",
+    }
+    ## SEND MESSAGE TO ALL USERS IN THE GAME LOBBY
+    game.add_message(content)
+    send(content, to=clients[game_code][suggesting_player])
+    if debug: print(content["message"])
 
 
 
