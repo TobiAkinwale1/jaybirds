@@ -109,7 +109,7 @@
 </dialog>
 
 <dialog id="dialog-end-turn" class="dialog">
-    <h2>Rebuttals complete. End Turn?</h2>
+    <h2 id="end-text">Rebuttals complete. End Turn?</h2>
     <button type="button" class="continue-btn" name="send" id="end-turn" onClick="endTurn()">End Turn</button>
     <button type="button" class="close-btn" name="send" id="make-accusation" onClick="promptAccusation()">Make Accusation</button>
 </dialog>
@@ -130,6 +130,7 @@
     const rebuttal = document.getElementById("rebuttal");
     const suggestion = document.getElementById("suggestion");
     const adjacentRooms = document.getElementById("adjacent-rooms");
+    const endText = document.getElementById("end-text");
     const name = document.currentScript.getAttribute("name");
     const dialogMove = document.getElementById("dialog-move");
     const dialogCharacter = document.getElementById("dialog-suggest-char");
@@ -170,6 +171,7 @@
         // END TURN BRANCH
         else if (data.type == "end_turn") {
             if (data.player == "{{player}}") {
+                endText.innerHTML = "Rebuttals complete. End Turn?";
                 dialogEndTurn.showModal();
             }
         }
@@ -188,13 +190,17 @@
             document.getElementById(`${data.new_room}-adj`).innerText = new_text.concat(`${data.character}\n`);
             
             // PROMPT USER FOR SUGGESTION
-            if (data.name == "{{player}}" && !data.new_room.includes("Hallway")) {
+            console.log(data.name);
+            console.log(data.cause);
+            console.log(data.new_room);
+            if (data.name == "{{player}}" && data.cause == "turn" && !data.new_room.includes("Hallway")) {
                 createMessage("Server", `${data.name} is making a suggestion`);
                 roomSuggestion = data.new_room;
                 dialogCharacter.showModal();
             }
-            else if (data.name == "{{player}}") {
-                stepTurn();
+            else if (data.name == "{{player}}" && data.cause == "turn") {
+                endText.innerHTML = "All moves blocked. End Turn?";
+                dialogEndTurn.showModal();
             }
         }
 

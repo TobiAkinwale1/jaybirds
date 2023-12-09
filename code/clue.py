@@ -250,6 +250,7 @@ def select_character(data):
     content = {
         "name": name,
         "type": "move",
+        "cause": "spawn",
         "old_room": room,
         "new_room": room,
         "character": character,
@@ -354,6 +355,7 @@ def submit_move(data):
     content = {
         "name": name,
         "type": "move",
+        "cause": "turn",
         "character": character,
         "old_room": old_room,
         "new_room": data['room'],
@@ -383,16 +385,17 @@ def submit_suggestion(data):
     character = data['character']
     weapon = data['weapon']
 
-    character_active = [player.player_name for player in game.players.values() if player.character_name == character]
-    if character_active:
+    player_moved = [player.player_name for player in game.players.values() if player.character_name == character]
+    if player_moved:
         ## MOVE PLAYER WHOSE CHAR WAS SUGGESTED
         old_room = game.board.get_location(character)
         game.board.move_character(character, room)
         
         ## SEND MOVE MESSAGE
         content = {
-            "name": character_active[0],
+            "name": player_moved[0],
             "type": "move",
+            "cause": "suggestion",
             "new_room": room,
             "old_room": old_room,
             "character": character,
