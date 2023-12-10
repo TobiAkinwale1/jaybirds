@@ -48,6 +48,14 @@ class Game:
             character_name=char,
         )
         self._player_list.append(self.players[name])
+
+        for player_name, player in self.players.items():
+            if (player_name != name):
+                # add existing players to notebook
+                self.players[name].notebook.add_player(player_name)
+
+                # add player column to each existing notebook
+                player.notebook.add_player(name)
         
     def remove_player(self, name):
         self.player_list.remove(self.get_player(name))

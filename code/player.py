@@ -11,7 +11,7 @@ class Player:
         self.hand = []  # List of cards in player's hand
         self.game_code = None  # Code to join the game session
         self.is_done = False  # Indicates if the player made an incorrect accusation
-        self.notebook = Notebook()  # Initialize the notebook
+        self.notebook = Notebook(player_name)  # Initialize the notebook
 
     def set_hand(self, hand:tuple):
         self.hand = hand
