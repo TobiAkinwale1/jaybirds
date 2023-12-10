@@ -482,7 +482,7 @@ h4 {
     border: 30px solid rgb(40, 55, 71);
     border-radius: 10px;
     color: white;
-    height: 70vh;
+    height: 90vh;
     width: 15vw;
     text-align:center;
     display: block;
@@ -519,18 +519,21 @@ h4 {
 ::backdrop {
     background-color: rgba(50, 50, 50, 0.7);
   }
-  
+
 .notebook-table {
     border-collapse: collapse;
-    width: 100%;
+    width: 50%;
 }
 
 .notebook-table th, .notebook-table td {
     border: 1px solid #dddddd;
-    padding: 8px;
+    padding: 4px;
     text-align: left;
+    font-size: 12px; /* Adjust the font size as needed */
+    line-height: 1.2; /* Adjust the line height as needed */
+    white-space: nowrap; /* Prevent text from wrapping */
 }
 
-.notebook-table th {
-    background-color: #f2f2f2;
+.no-border {
+    border: none; /* Remove borders for this class */
 }
