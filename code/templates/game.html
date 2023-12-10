@@ -33,6 +33,23 @@
                     <div class="card" name="card" id="{{ card }}">{{ card }}</button>
                 {% endfor %}
             </div>             -->
+            <h3>NOTEBOOK:</h3>
+            <div class="notebook-content">
+                <!-- Render notebook content here -->
+                {% for player, categories in notebook_data.items() %}
+                    <div class="player-notebook">
+                        <strong>{{ player }}</strong>
+                        {% for category, items in categories.items() %}
+                            <div class="notebook-category">
+                                <span>{{ category }}:</span>
+                                {% for item, marking in items %}
+                                    <span>{{ item }} - {{ marking }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     <!-- GAME BOARD -->

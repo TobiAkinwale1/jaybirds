@@ -14,7 +14,7 @@ os.chdir(current_dir)
 
 from board import Board
 from game import Game
-from helpers import get_session_data
+# from helpers import get_session_data
 
 
 ## FLASK SETUP
@@ -133,19 +133,23 @@ def game():
         print(game_instance.players)
     
     ## RENDER THE GAME PAGE
-    character = game_instance.get_player(name).character_name
-    adjacent_rooms = game_instance.board.get_adjacent_rooms(character)
+    character = game_instance.get_player(name)
+    adjacent_rooms = game_instance.board.get_adjacent_rooms(character.character_name)
+    notebook_data = character.notebook.display_notebook()
+    print("NOTEBOOK:", notebook_data)
+
     return render_template(
         "game.html", 
         game=game_code,
         game_instance=game_instance,
         player=name, 
-        character=character, 
+        character=character.character_name, 
         messages=game_instance.get_messages(), 
         board=game_instance.board.rooms, 
         adjacent_rooms=adjacent_rooms,
         characters=game_instance.board.CHARACTERS,
         weapons=game_instance.board.WEAPONS,
+        notebook_data=notebook_data
     )
 
 

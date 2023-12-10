@@ -1,28 +1,32 @@
 class Notebook:
-    def __init__(self, rows, cols):
-        self.cells = [[None for _ in range(cols)] for _ in range(rows)]
-        self.rows = [str(i) for i in range(1, rows + 1)]
-        self.cols = [chr(i) for i in range(65, 65 + cols)]  # ASCII values for uppercase letters
-        self.markings = {}
+    def __init__(self):
+        # Example structure for the notebook
+        self.notebook_data = {
+            "Me": {"Suspects": set(), "Weapons": set(), "Rooms": set()},
+            "Opponent1": {"Suspects": set(), "Weapons": set(), "Rooms": set()},
+            # Add more opponents as needed
+            "Solution": {"Suspect": None, "Weapon": None, "Room": None},
+        }
 
-    def setCell(self, row, col, marking):
-        """Sets the marking for a specific cell identified by row and column."""
-        if row in self.rows and col in self.cols:
-            self.cells[int(row) - 1][ord(col) - 65] = marking  # Convert to 0-based index
-            self.markings[f'{row}{col}'] = marking
+    def set_cell(self, player, category, item, marking):
+        """Sets the marking for a specific cell."""
+        if player in self.notebook_data and category in self.notebook_data[player]:
+            self.notebook_data[player][category].add((item, marking))
         else:
-            print(f"Invalid row or column. Row should be in {self.rows} and column should be in {self.cols}.")
+            print(f"Invalid player or category: {player}, {category}")
 
-
-# Usage example:
-# Create a 5x5 notebook
-notebook = Notebook(5, 5)
-
-# Set a cell marking
-notebook.setCell('1', 'A', 'X')
-
-# Check the current state of the cells
-print(notebook.cells)
-
-# Check the markings dictionary
-print(notebook.markings)
+    def display_notebook(self):
+        """Returns the current state of the notebook."""
+        notebook_content = {}
+        for player, categories in self.notebook_data.items():
+            player_data = {}
+            for category, items in categories.items():
+                # Check if items is None before iterating
+                if items is not None:
+                    category_data = [(item, marking) for item, marking in items]
+                    player_data[category] = category_data
+                else:
+                    # If items is None, set an empty list for the category
+                    player_data[category] = []
+            notebook_content[player] = player_data
+        return notebook_content
