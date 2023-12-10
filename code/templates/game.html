@@ -2,6 +2,7 @@
 {% block content %}
 <button type="button" class="nav-button" name="start" id="send-btn" onClick="startGame()">Start Game</button>
 <button type="button" class="nav-button" name="code" id="code">{{ game }}</button>
+<button type="button" class="nav-button" name="hand" id="hand-btn" onClick="showHand()">Hand</button>
 <!-- {% for rm in adjacent_rooms %}
     <button type="button" class="nav-button" name="move" id="{{ rm }}" onClick="submitMove('{{ rm }}')">{{ rm }}</button>
 {% endfor %} -->
@@ -17,11 +18,11 @@
         <!-- game content -->
         <div class="hand-box">
             <!-- hand content -->
-            <h3>{{ player }}</h3>
+            <h3 style="font-variant: small-caps;">{{ player }}</h3>
             <body>
                 {{ character }}
             </body>
-            <h3>HAND:</h3>
+            <!-- <h3>HAND:</h3> -->
             <!-- <div class="hand" id="hand"></div> -->
             <!-- <body>
                 {% for card in game_instance.get_player(player).hand %}
@@ -46,14 +47,15 @@
 
                     {% for category_name, category in notebook_data.items() %}
                         <tr class="no-border">
-                            <td colspan="{{ notebook_columns|length + 1 }}"><strong>{{ category_name }}</strong></td>
+                            <td colspan="{{ notebook_columns|length + 1 }}"><strong style="font-variant: small-caps;">{{ category_name }}</strong></td>
                         </tr>
                         
                         {% for item_name, item in category.items() %}
                             <tr>
                                 <td>{{ item_name }}</td>
                                 {% for player_val in item %}
-                                    <td>{{ player_val if player_val else '' }}</td>
+                                    <td><input type="checkbox" class="notebook-cell">{{ player_val if player_val else '' }}</td>
+                                    <!-- <td><button class="notebook-cell">{{ player_val if player_val else '' }}</button></td> -->
                                 {% endfor %}
                             </tr>
                         {% endfor %}
@@ -64,7 +66,6 @@
     </div>
     <!-- GAME BOARD -->
     <div class="board-box">
-        <!-- board content -->
         <div>
             <div class="board-grid">
                 {% for room, properties in board.items() %}
@@ -80,7 +81,6 @@
     </div>
     <!-- MESSAGING -->
     <div class="game-box">
-        <!-- game content -->
         <div class="message-box">
             <h2>Messages</h2>
             <div class="messages" id="messages"></div>
@@ -187,6 +187,12 @@
     <button type="button" class="continue-btn" onClick="endTurn()">Continue</button>
 </dialog>
 
+<dialog id="dialog-hand" class="dialog">
+    <h2 id="suggestion"></h2>
+    <div class="card-box" id="display-hand"></div>
+    <button type="button" class="close-btn" name="send" id="noRebuttal" onClick="closeHand()">Close</button>
+</dialog>
+
 
 <script type="text/javascript" name={{name}}>
     var socketio = io();
@@ -197,12 +203,14 @@
     const messages = document.getElementById("messages");
     const rebuttal = document.getElementById("rebuttal");
     const suggestion = document.getElementById("suggestion");
+    const displayHand = document.getElementById("display-hand");
     const adjacentRooms = document.getElementById("adjacent-rooms");
     const endText = document.getElementById("end-text");
     const name = document.currentScript.getAttribute("name");
     const win = document.getElementById("win-text");
 
     // DIALOG BOXES
+    const dialogHand = document.getElementById("dialog-hand");
     const dialogMove = document.getElementById("dialog-move");
     const dialogSuggestCharacter = document.getElementById("dialog-suggest-char");
     const dialogSuggestWeapon = document.getElementById("dialog-suggest-weapon");
@@ -343,9 +351,12 @@
     // POPULATE CARDS IN THE PLAYER'S HAND
     const createHand = (cards) => {
         hand.innerHTML = "";
+        displayHand.innerHTML = "";
         for (i in cards) {
-            const content = `<button type="button" class="card-btn" name="send" id="${cards[i]}" onClick="submitRebuttal('${cards[i]}')">${cards[i]}</button>`;
-            hand.innerHTML += content;
+            const contentHand = `<button type="button" class="card-btn" name="send" id="${cards[i]}" onClick="submitRebuttal('${cards[i]}')">${cards[i]}</button>`;
+            const contentDisplay = `<button type="button" class="card-btn">${cards[i]}</button>`;
+            hand.innerHTML += contentHand;
+            displayHand.innerHTML += contentDisplay;
         }
     }
     // POPULATE ROOM OPTIONS IN MOVE DIALOGUE
@@ -447,7 +458,14 @@
         socketio.emit("submitAccusation", {room: roomAccusation, character: characterAccusation, weapon: weaponAccusation, player: "{{player}}"});
         dialogAccuseWeapon.close();
     }
-
+    const showHand = () => {
+        dialogHand.showModal();
+        console.log("showHand")
+    };
+    const closeHand = () => {
+        dialogHand.close();
+        console.log("closeHand")
+    };
 
 </script>
 

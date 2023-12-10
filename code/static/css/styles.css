@@ -419,6 +419,32 @@ h4 {
     border-radius: 10px;    
 }
 
+.notebook-cell {
+    background-color: rgb(40, 55, 71);
+    color: whitesmoke;
+    /* background-color: rgb(129, 79, 58); */
+    /* color: rgb(80, 41, 27); */
+    font-family: "Times New Roman";    
+    /* font-size: 20px; */
+    /* font-weight: bold; */
+    /* font-variant: small-caps;     */
+    cursor:pointer;
+    border:none;
+    width:1vw;
+    height:1vw;    
+    margin: 0px;  
+}
+.card-btn:hover {
+    background-color: rgb(28, 40, 51 );
+    color: rgb(251, 236, 192);
+    border-color: rgb(33, 32, 32);
+}
+.card-btn:focus {
+    background-color: whitesmoke;
+    color: rgb(33, 32, 32);
+    border:none;
+}
+
 /* .continue-btn {
     background-color: rgb(13, 129, 9);
     color: white;
@@ -519,6 +545,13 @@ h4 {
 ::backdrop {
     background-color: rgba(50, 50, 50, 0.7);
   }
+
+.notebook-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
 
 .notebook-table {
     border-collapse: collapse;
