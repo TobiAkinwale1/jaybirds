@@ -1,5 +1,6 @@
 from copy import deepcopy
 from xml.dom import NotFoundErr
+# from code.clue import character
 
 from player import Player
 from board import Board, Character
@@ -47,6 +48,10 @@ class Game:
             character_name=char,
         )
         self._player_list.append(self.players[name])
+        
+    def remove_player(self, name):
+        self.player_list.remove(self.get_player(name))
+        # self._turn_idx -= 1
 
     def get_messages(self):
         return self.messages

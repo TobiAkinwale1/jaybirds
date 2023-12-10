@@ -97,6 +97,35 @@
     </div>
 </dialog>
 
+<dialog id="dialog-accuse-char" class="dialog">
+    <h2>Accuse a Character!</h2>
+    <div class="card-box">
+    {% for key, value in characters.items() %}
+        <button type="button" class="{{ value.color }}-btn" name="send" id="accused_{{ value.name }}" onClick="accuseCharacter('{{ value.name }}')">{{ value.name }}</button>
+    {% endfor %}
+    </div>
+</dialog>
+
+<dialog id="dialog-accuse-room" class="dialog">
+    <h2>Select the room!</h2>
+    <div class="card-box">
+    {% for room, properties in board.items() %}
+        {% if properties.type == 'room' %}
+            <button type="button" class="card-btn" name="send" id="accused_{{ room }}" onClick="accuseRoom('{{ room }}')">{{ room }}</button>
+        {% endif %}
+    {% endfor %}
+    </div>
+</dialog>
+
+<dialog id="dialog-accuse-weapon" class="dialog">
+    <h2>State the murder Weapon!</h2>
+    <div class="card-box">
+    {% for weapon in weapons %}
+        <button type="button" class="red-btn" name="send" id="accused_{{ weapon }}" onClick="accuseWeapon('{{ weapon }}')">{{ weapon }}</button>
+    {% endfor %}
+    </div>
+</dialog>
+
 <dialog id="dialog-submit-rebuttal" class="dialog">
     <h2 id="suggestion"></h2>
     <div class="card-box" id="hand"></div>
@@ -114,16 +143,28 @@
     <button type="button" class="close-btn" name="send" id="make-accusation" onClick="promptAccusation()">Make Accusation</button>
 </dialog>
 
-<dialog id="dialog-accusation" class="dialog">
-    <h2 id="rebuttal"></h2>
-    <button type="button" class="continue-btn" name="send" id="end-turn" onClick="endTurn()">End Turn</button>
+<dialog id="dialog-start-turn" class="dialog">
+    <h2 id="end-text">It's your turn!</h2>
+    <button type="button" class="continue-btn" name="send" id="start-turn" onClick="startTurn()">Move</button>
     <button type="button" class="close-btn" name="send" id="make-accusation" onClick="promptAccusation()">Make Accusation</button>
+</dialog>
+
+<dialog id="dialog-win" class="dialog">
+    <h2 id="win-text"></h2>
+    <a href="{{ url_for('home') }}"><button type="button" class="continue-btn">Return Home</button></a>
+</dialog>
+
+<dialog id="dialog-loss" class="dialog">
+    <h2>Your accusation was incorrect!</h2>
+    <h2>You have been eliminated but can still make rebuttals!</h2>
+    <button type="button" class="continue-btn" onClick="endTurn()">Continue</button>
 </dialog>
 
 
 <script type="text/javascript" name={{name}}>
     var socketio = io();
 
+    // TEXT FIELDS
     const hand = document.getElementById("hand");
     const banner = document.getElementById("banner");
     const messages = document.getElementById("messages");
@@ -132,19 +173,33 @@
     const adjacentRooms = document.getElementById("adjacent-rooms");
     const endText = document.getElementById("end-text");
     const name = document.currentScript.getAttribute("name");
+    const win = document.getElementById("win-text");
+
+    // DIALOG BOXES
     const dialogMove = document.getElementById("dialog-move");
-    const dialogCharacter = document.getElementById("dialog-suggest-char");
-    const dialogWeapon = document.getElementById("dialog-suggest-weapon");
+    const dialogSuggestCharacter = document.getElementById("dialog-suggest-char");
+    const dialogSuggestWeapon = document.getElementById("dialog-suggest-weapon");
+    const dialogAccuseCharacter = document.getElementById("dialog-accuse-char");
+    const dialogAccuseRoom = document.getElementById("dialog-accuse-room");
+    const dialogAccuseWeapon = document.getElementById("dialog-accuse-weapon");
     const dialogSubmitRebuttal = document.getElementById("dialog-submit-rebuttal");
     const dialogAcknowledgeRebuttal = document.getElementById("dialog-acknowledge-rebuttal");
+    const dialogStartTurn = document.getElementById("dialog-start-turn");
     const dialogEndTurn = document.getElementById("dialog-end-turn");
     const dialogAccusation = document.getElementById("dialog-accusation");
+    const dialogWin = document.getElementById("dialog-win");
+    const dialogLoss = document.getElementById("dialog-loss");
     
+    // VARIABLES
     var characterSuggestion;
+    var characterAccusation;
     var weaponSuggestion;
+    var weaponAccusation;
     var roomSuggestion;
+    var roomAccusation;
+    var num_rooms;
 
-    // RECEIVE FUNCTIONS
+    // RECEIVE FUNCTIONS (MESSAGES FROM THE SERVER)
     socketio.on("message", (data) => {
 
         // PARSE THE MESSAGE TYPE
@@ -162,14 +217,9 @@
         else if (data.type == "start_turn") {
             banner.innerHTML = data.message;
             if (data.player == "{{player}}") {
-                updateAdjacentRooms(data.adjacent_rooms)
-                if (data.adjacentRooms.length > 0) {
-                    dialogMove.showModal();
-                }
-                else {
-                    endText.innerHTML = "All moves are blocked. End Turn?";
-                    dialogEndTurn.showModal();                    
-                }
+                num_rooms = updateAdjacentRooms(data.adjacent_rooms)
+                dialogStartTurn.showModal()
+                // dialogMove.showModal();
             }
         }
         // END TURN BRANCH
@@ -199,7 +249,7 @@
             if (data.name == "{{player}}" && data.cause == "turn" && !data.new_room.includes("Hallway")) {
                 createMessage("Server", `${data.name} is making a suggestion`);
                 roomSuggestion = data.new_room;
-                dialogCharacter.showModal();
+                dialogSuggestCharacter.showModal();
             }
             else if (data.name == "{{player}}" && data.cause == "turn") {
                 endText.innerHTML = "Can't make a suggestion from the hallway. End Turn?";
@@ -225,8 +275,17 @@
             dialogAcknowledgeRebuttal.showModal();
         }
         // ACCUSATION RECEIVED BRANCH
-        else if (data.type == "accuse") {
-            banner.innerHTML = `${data.name} ACCUSED ${data.character}`;
+        else if (data.type == "win") {
+            banner.innerHTML = `${data.message}`;
+            win.innerHTML = `${data.message}`;
+            dialogWin.showModal()
+        }
+        // ACCUSATION RECEIVED BRANCH
+        else if (data.type == "loss") {
+            banner.innerHTML = `${data.message}`;
+            if (data.name == "{{player}}") {
+                dialogLoss.showModal()
+            }
         }
         // ACCUSATION RECEIVED BRANCH
         else if (data.type == "banner") {
@@ -254,9 +313,6 @@
         `;
         messages.innerHTML += content;
     }
-
-    // HELPER FUNCTIONS
-
     // POPULATE CARDS IN THE PLAYER'S HAND
     const createHand = (cards) => {
         hand.innerHTML = "";
@@ -268,10 +324,12 @@
     // POPULATE ROOM OPTIONS IN MOVE DIALOGUE
     const updateAdjacentRooms = (rooms) => {
         adjacentRooms.innerHTML = "";
+        console.log(rooms)
         for (i in rooms) {
             const content = `<button type="button" class="card-btn" name="send" id="${rooms[i]}" onClick="submitMove('${rooms[i]}')">${rooms[i]}</button>`;
             adjacentRooms.innerHTML += content;
         }
+        return rooms.length
     }
     // SEND MESSAGE TO OTHER PLAYERS
     const sendMessage = () => {
@@ -308,43 +366,60 @@
     const promptAccusation = () => {
         dialogEndTurn.close();
         console.log("promptAccusation")
-        dialogAccusation.showModal();
+        dialogAccuseCharacter.showModal();
     };
     // PROMPT NEXT PLAYER'S REBUTTAL TO CURRENT PLAYER
-    const submitAccusation = () => {
-        dialogAccusation.close();
-        console.log("submitAccusation")
-        socketio.emit("submitAccusation", {});
+    const startTurn = () => {
+        dialogStartTurn.close();
+        console.log("startTurn")
+        if (num_rooms > 0) {
+            dialogMove.showModal();
+        }
+        else {
+            endText.innerHTML = "All moves are blocked. End Turn?";
+            dialogEndTurn.showModal();                    
+        }
     };
     // PROMPT NEXT PLAYER'S REBUTTAL TO CURRENT PLAYER
     const endTurn = () => {
+        dialogLoss.close()
         dialogEndTurn.close();
         console.log("endTurn")
         socketio.emit("endTurn", {});
     };
-    // // CURRENT PLAYER ACKNOWLEDGES AND REQUESTS NEXT REBUTTAL
-    // const acknowledgeRebuttal = (card) => {
-    //     dialogAcknowledgeRebuttal.close();
-    //     socketio.emit("promptRebuttal", {});
-    // };
-
     // CHANGE PLAYER TURN
     const stepTurn = () => {
         console.log("stepTurn")
         socketio.emit("stepTurn", {data: ""})
     };
-
     function suggestCharacter(char){
         characterSuggestion = char;
-        dialogCharacter.close();
-        dialogWeapon.showModal();
+        dialogSuggestCharacter.close();
+        dialogSuggestWeapon.showModal();
     }
-    
     function suggestWeapon(weapon){
         weaponSuggestion = weapon;
         socketio.emit("submitSuggestion", {room: roomSuggestion, character: characterSuggestion, weapon: weaponSuggestion, player: "{{player}}"});
-        dialogWeapon.close();
-}
+        dialogSuggestWeapon.close();
+    }
+    function accuseCharacter(char){
+        console.log("accuseCharacter")
+        characterAccusation = char;
+        dialogAccuseCharacter.close();
+        dialogAccuseRoom.showModal();
+    }
+    function accuseRoom(room){
+        console.log("accuseRoom")
+        roomAccusation = room;
+        dialogAccuseRoom.close();
+        dialogAccuseWeapon.showModal();
+    }
+    function accuseWeapon(weapon){
+        console.log("accuseWeapon")
+        weaponAccusation = weapon;
+        socketio.emit("submitAccusation", {room: roomAccusation, character: characterAccusation, weapon: weaponAccusation, player: "{{player}}"});
+        dialogAccuseWeapon.close();
+    }
 
 
 </script>

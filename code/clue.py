@@ -278,6 +278,7 @@ def start_game(data):
     if debug: 
         print(f"\nSTART SESSION {session}\n")
         print(game.turn)
+        print(f"\nSOLUTION {game.solution}\n")
 
     ## SEND HANDS TO EACH PLAYER
     for player_name, player_obj in game.players.items():
@@ -305,7 +306,8 @@ def start_game(data):
 
     ## BUILD MESSAGE FROM ARGUMENTS
     character = game.get_player(player).character_name
-    adjacent_rooms = game.board.get_adjacent_rooms(character)
+    adjacent_rooms = tuple(game.board.get_adjacent_rooms(character))
+    print(f"\nADJ ROOMS {adjacent_rooms}\n")
     content = {
         "name": "Server",
         "type": "start_turn",
@@ -536,19 +538,53 @@ def submit_rebuttal(data):
     send(content, to=clients[game_code][suggesting_player])
     if debug: print(content["message"])
 
+## RECEIVE SUGGESTION FROM CLIENT
+@socketio.on("submitAccusation")
+def submit_accusation(data):
+    ## PULL GAME CODE FROM SESSION DICT
+    name = session.get("name")
+    game_code = session.get("game_code")
+    game = Game.lookup(game_code)
+    
+    ## DEBUG STATEMENTS
+    if debug: print(f"\nsubmitAccusation MESSAGE SESSION {session}\n")
 
-
-
-## LOOP
-## submitMove -> 
-## promptSuggestion -> 
-## submitSuggestion -> 
-## promptRebuttal -> 
-## submitRebuttal -> 
-## promptEndTurn -> 
-## submitEndTurn -> 
-## stepTurn -> 
-
+    ## MOVE PLAYER
+    player = data['player']
+    room = data['room']
+    character = data['character']
+    weapon = data['weapon']
+    
+    result = game.check_solution(room, character, weapon)
+    
+    if result == True:
+        game.end_game(player)
+        content = {
+            "name": player,
+            "type": "win",
+            "room": room,
+            "weapon": weapon,
+            "character": character,
+            "message": f"{game.get_player(player).character_name} correctly accused {character} of the murder in the {room} with a {weapon}!",
+        }   
+        ## SEND MOVE MESSAGE
+        game.add_message(content)
+        send(content, to=game_code)
+        if debug: print(content["message"])        
+    else: 
+        game.remove_player(player)
+        content = {
+            "name": player,
+            "type": "loss",
+            "room": room,
+            "weapon": weapon,
+            "character": character,
+            "message": f"{game.get_player(player).character_name} made an false accusation and was eliminated!",
+        }    
+        ## SEND MOVE MESSAGE
+        game.add_message(content)
+        send(content, to=game_code)
+        if debug: print(content["message"])
 
 
 
