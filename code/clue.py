@@ -135,7 +135,7 @@ def game():
     ## RENDER THE GAME PAGE
     character = game_instance.get_player(name)
     adjacent_rooms = game_instance.board.get_adjacent_rooms(character.character_name)
-    notebook_data = character.notebook.display_notebook()
+    notebook_data = character.notebook.notebook_data
     print("NOTEBOOK:", notebook_data)
 
     return render_template(

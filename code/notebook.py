@@ -1,32 +1,73 @@
+from board import Board
+
 class Notebook:
     def __init__(self):
         # Example structure for the notebook
+
+        self.empty = {
+            'Suspects': {},
+            'Weapons': {},
+            'Rooms': {}
+        }
+
+        for sus in Board.CHARACTERS:
+            self.empty['Suspects'][sus] = None
+        for wep in Board.WEAPONS:
+            self.empty['Weapons'][wep] = None
+        for room in Board.ROOMS:
+            if ('Hallway' not in room):
+                self.empty['Rooms'][room] = None
+
         self.notebook_data = {
-            "Me": {"Suspects": set(), "Weapons": set(), "Rooms": set()},
-            "Opponent1": {"Suspects": set(), "Weapons": set(), "Rooms": set()},
-            # Add more opponents as needed
-            "Solution": {"Suspect": None, "Weapon": None, "Room": None},
+            'Me' : self.empty,
+            'Grey' : self.empty
         }
 
     def set_cell(self, player, category, item, marking):
-        """Sets the marking for a specific cell."""
-        if player in self.notebook_data and category in self.notebook_data[player]:
-            self.notebook_data[player][category].add((item, marking))
+        '''Sets the marking for a specific cell.'''
+        if (player in self.notebook_data) and (category in self.notebook_data[player]) and (item in self.notebook_data[player][category]):
+            self.notebook_data[player][category][item] = marking
         else:
-            print(f"Invalid player or category: {player}, {category}")
+            print(f'Invalid entry: {player}, {category}')
 
-    def display_notebook(self):
-        """Returns the current state of the notebook."""
-        notebook_content = {}
-        for player, categories in self.notebook_data.items():
-            player_data = {}
-            for category, items in categories.items():
-                # Check if items is None before iterating
-                if items is not None:
-                    category_data = [(item, marking) for item, marking in items]
-                    player_data[category] = category_data
-                else:
-                    # If items is None, set an empty list for the category
-                    player_data[category] = []
-            notebook_content[player] = player_data
-        return notebook_content
+if __name__ == '__main__':
+    notebook = Notebook()
+    notebook.set_cell('Me', 'Weapons', 'Rope', 'X')
+
+    data = notebook.notebook_data
+
+    # Print the table header
+    print('PLAYERS: | ', end='')
+    for player in data.keys():
+        print(player + ' | ', end='')
+    print()
+
+    table = {}
+    player_index = {}
+    i = 0
+
+    for player_name, player in data.items():
+        player_index[player_name] = i
+
+        for category_name, category in data[player_name].items():
+            if (category_name not in table.keys()):
+                table[category_name] = {}
+
+            for item_name, item in data[player_name][category_name].items():
+
+                if (item_name not in table.keys()):
+                    table[category_name][item_name] = []
+
+                table[category_name][item_name].append(item)
+
+    for category_name, category in table.items():
+        print('\n' + category_name + ':')
+        for item_name, item in table[category_name].items():
+            print(item_name + ': | ', end='')
+
+            for player_val in table[category_name][item_name]:
+                if not player_val:
+                    player_val = ''
+                print(player_val + ' | ', end='')
+
+            print()

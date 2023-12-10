@@ -36,20 +36,27 @@
             <h3>NOTEBOOK:</h3>
             <div class="notebook-content">
                 <!-- Render notebook content here -->
-                {% for player, categories in notebook_data.items() %}
-                    <div class="player-notebook">
-                        <strong>{{ player }}</strong>
-                        {% for category, items in categories.items() %}
-                            <div class="notebook-category">
-                                <span>{{ category }}:</span>
-                                {% for item, marking in items %}
-                                    <span>{{ item }} - {{ marking }}</span>
-                                {% endfor %}
-                            </div>
+                <table class="notebook-table">
+                    <tr>
+                        <th>Players</th>
+                        {% for player, categories in notebook_data.items() %}
+                            <th>{{ player }}</th>
                         {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
+                    </tr>
+                    {% for category, _ in notebook_data['Me'].items() %}
+                        <td><strong>{{ category }}</strong></td>
+                        <tr>
+                            {% for player, categories in notebook_data.items() %}
+                                <td>
+                                    {% for item, marking in categories[category].items() %}
+                                        <span>{{ item }} - {{ marking }}</span><br>
+                                    {% endfor %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>                                                                         
         </div>
     </div>
     <!-- GAME BOARD -->
