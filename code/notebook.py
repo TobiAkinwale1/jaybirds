@@ -20,7 +20,6 @@ class Notebook:
 
         self.notebook_data = {
             'Me' : self.empty,
-            'Grey' : self.empty
         }
 
     def set_cell(self, player, category, item, marking):
@@ -29,6 +28,23 @@ class Notebook:
             self.notebook_data[player][category][item] = marking
         else:
             print(f'Invalid entry: {player}, {category}')
+
+    def get_table(self):
+        table = {}
+
+        for player_name, player in self.notebook_data.items():
+            for category_name, category in self.notebook_data[player_name].items():
+                if (category_name not in table.keys()):
+                    table[category_name] = {}
+
+                for item_name, item in self.notebook_data[player_name][category_name].items():
+
+                    if (item_name not in table.keys()):
+                        table[category_name][item_name] = []
+
+                    table[category_name][item_name].append(item)
+
+        return table
 
 if __name__ == '__main__':
     notebook = Notebook()
@@ -42,23 +58,7 @@ if __name__ == '__main__':
         print(player + ' | ', end='')
     print()
 
-    table = {}
-    player_index = {}
-    i = 0
-
-    for player_name, player in data.items():
-        player_index[player_name] = i
-
-        for category_name, category in data[player_name].items():
-            if (category_name not in table.keys()):
-                table[category_name] = {}
-
-            for item_name, item in data[player_name][category_name].items():
-
-                if (item_name not in table.keys()):
-                    table[category_name][item_name] = []
-
-                table[category_name][item_name].append(item)
+    table = notebook.get_table()
 
     for category_name, category in table.items():
         print('\n' + category_name + ':')

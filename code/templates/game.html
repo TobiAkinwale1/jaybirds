@@ -38,25 +38,28 @@
                 <!-- Render notebook content here -->
                 <table class="notebook-table">
                     <tr>
-                        <th>Players</th>
-                        {% for player, categories in notebook_data.items() %}
+                        <th>PLAYERS</th>
+                        {% for player in notebook_columns %}
                             <th>{{ player }}</th>
                         {% endfor %}
                     </tr>
-                    {% for category, _ in notebook_data['Me'].items() %}
-                        <td><strong>{{ category }}</strong></td>
+
+                    {% for category_name, category in notebook_data.items() %}
                         <tr>
-                            {% for player, categories in notebook_data.items() %}
-                                <td>
-                                    {% for item, marking in categories[category].items() %}
-                                        <span>{{ item }} - {{ marking }}</span><br>
-                                    {% endfor %}
-                                </td>
-                            {% endfor %}
+                            <td colspan="{{ notebook_columns|length + 1 }}"><strong>{{ category_name }}</strong></td>
                         </tr>
+                        
+                        {% for item_name, item in category.items() %}
+                            <tr>
+                                <td>{{ item_name }}</td>
+                                {% for player_val in item %}
+                                    <td>{{ player_val if player_val else '' }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
                     {% endfor %}
                 </table>
-            </div>                                                                         
+            </div>
         </div>
     </div>
     <!-- GAME BOARD -->
